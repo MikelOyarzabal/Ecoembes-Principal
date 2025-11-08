@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import dto.ContenedorDTO;
+import entity.Contenedor;
 import entity.User;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -28,8 +30,8 @@ import service.AuthService;
 import service.ReciclajeService;
 
 @RestController
-@RequestMapping("/auctions")
-@Tag(name = "Auctions Controller", description = "Operations related to categories, articles and bids")
+@RequestMapping("/reciclaje")
+@Tag(name = "Reciclaje Controller", description = "Operations related to contenedor and plantareciclaje")
 public class ReciclajeController {
 
 	private final ReciclajeService reciclajeService;
@@ -44,20 +46,20 @@ public class ReciclajeController {
 
 	// GET all categories
 	@Operation(
-		summary = "Get all categories",
-		description = "Returns a list of all available categories",
+		summary = "Get all Contenedores",
+		description = "Returns a list of all available Contenedores",
 		responses = {
-			@ApiResponse(responseCode = "200", description = "OK: List of categories retrieved successfully"),
-			@ApiResponse(responseCode = "204", description = "No Content: No Categories found"),
+			@ApiResponse(responseCode = "200", description = "OK: List of Contenedores retrieved successfully"),
+			@ApiResponse(responseCode = "204", description = "No Content: No Contendores found"),
 			@ApiResponse(responseCode = "500", description = "Internal server error")
 		}
 	)
 	@GetMapping("/categories")
-	public ResponseEntity<List<CategoryDTO>> getAllCategories() {
+	public ResponseEntity<List<ContenedorDTO>> getAllContendores() {
 		try {
-			List<Category> categories = reciclajeService.getCategories();
+			List<Contenedor> contenedores = reciclajeService.getContenedor();
 			
-			if (categories.isEmpty()) {
+			if (contenedores.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 
@@ -209,8 +211,8 @@ public class ReciclajeController {
 	}
 
 	// Converts a Category to a CategoryDTO
-	private CategoryDTO categoryToDTO(Category category) {
-		return new CategoryDTO(category.getName());
+	private ContenedorDTO contenedorToDTO(Contenedor contenedor) {
+		return new ContenedorDTO(contenedor.getId());
 	}
 	
 	// Converts an Article to an ArticleDTO

@@ -11,6 +11,7 @@ public class User {
 	private String nickname;
 	private String password;
 	private String email;
+	
 
 	// Constructor without parameters
 	public User() { }

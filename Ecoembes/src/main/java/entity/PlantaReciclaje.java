@@ -1,10 +1,13 @@
 package entity;
 
+import java.util.ArrayList;
+
 public class PlantaReciclaje {
 	private long id;
 	private String nombre;
 	private int capacidad;
 	private int capacidadDisponible;
+	private ArrayList<Contenedor> listaContenedor;
 	public PlantaReciclaje() {
 		super();
 	}
@@ -14,6 +17,14 @@ public class PlantaReciclaje {
 		this.nombre = nombre;
 		this.capacidad = capacidad;
 		this.capacidadDisponible = capacidadDisponible;
+		this.listaContenedor=new ArrayList<Contenedor>();
+	}
+	
+	public ArrayList<Contenedor> getListaContenedor() {
+		return listaContenedor;
+	}
+	public void setListaContenedor(ArrayList<Contenedor> listaContenedor) {
+		this.listaContenedor = listaContenedor;
 	}
 	public long getId() {
 		return id;
