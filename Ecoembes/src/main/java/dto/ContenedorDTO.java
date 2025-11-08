@@ -1,36 +1,37 @@
 package dto;
 
+import java.util.Date;
+
 import entity.Llenado;
 
 public class ContenedorDTO {
 	private long id;
-	private String ubicacion;
+	private int codigoPostal;
 	private float capacidad;
 	private Llenado nivelDeLlenado;
-	
-	public ContenedorDTO(long id, String ubicacion, float capacidad, Llenado nivelDeLlenado) {
-		super();
-		this.id = id;
-		this.ubicacion = ubicacion;
-		this.capacidad = capacidad;
-		this.nivelDeLlenado = nivelDeLlenado;
-	}
-	
+	private Date fechaVaciado;
 	public ContenedorDTO() {
 		super();
 	}
-
+	public ContenedorDTO(long id, int codigoPostal, float capacidad, Llenado nivelDeLlenado, Date fechaVaciado) {
+		super();
+		this.id = id;
+		this.codigoPostal = codigoPostal;
+		this.capacidad = capacidad;
+		this.nivelDeLlenado = nivelDeLlenado;
+		this.fechaVaciado = fechaVaciado;
+	}
 	public long getId() {
 		return id;
 	}
 	public void setId(long id) {
 		this.id = id;
 	}
-	public String getUbicacion() {
-		return ubicacion;
+	public int getCodigoPostal() {
+		return codigoPostal;
 	}
-	public void setUbicacion(String ubicacion) {
-		this.ubicacion = ubicacion;
+	public void setCodigoPostal(int codigoPostal) {
+		this.codigoPostal = codigoPostal;
 	}
 	public float getCapacidad() {
 		return capacidad;
@@ -43,5 +44,11 @@ public class ContenedorDTO {
 	}
 	public void setNivelDeLlenado(Llenado nivelDeLlenado) {
 		this.nivelDeLlenado = nivelDeLlenado;
+	}
+	public Date getFechaVaciado() {
+		return fechaVaciado;
+	}
+	public void setFechaVaciado(Date fechaVaciado) {
+		this.fechaVaciado = fechaVaciado;
 	}
 }
