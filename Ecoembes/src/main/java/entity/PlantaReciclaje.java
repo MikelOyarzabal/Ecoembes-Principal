@@ -11,11 +11,11 @@ public class PlantaReciclaje {
 	public PlantaReciclaje() {
 		super();
 	}
-	public PlantaReciclaje(long id, String nombre, int capacidad, int capacidadDisponible) {
+	public PlantaReciclaje(long id, String nombre, int capacidadDisponible) {
 		super();
 		this.id = id;
 		this.nombre = nombre;
-		this.capacidad = capacidad;
+		this.setCapacidad();
 		this.capacidadDisponible = capacidadDisponible;
 		this.listaContenedor=new ArrayList<Contenedor>();
 	}
@@ -41,8 +41,10 @@ public class PlantaReciclaje {
 	public int getCapacidad() {
 		return capacidad;
 	}
-	public void setCapacidad(int capacidad) {
-		this.capacidad = capacidad;
+	public void setCapacidad() {
+		for(Contenedor c: listaContenedor) {
+			this.capacidad += c.getCapacidad();
+		}
 	}
 	public int getCapacidadDisponible() {
 		return capacidadDisponible;
