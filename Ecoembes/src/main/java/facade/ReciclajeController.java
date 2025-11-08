@@ -54,7 +54,7 @@ public class ReciclajeController {
 			@ApiResponse(responseCode = "500", description = "Internal server error")
 		}
 	)
-	@GetMapping("/categories")
+	@GetMapping("/contenedores")
 	public ResponseEntity<List<ContenedorDTO>> getAllContendores() {
 		try {
 			List<Contenedor> contenedores = reciclajeService.getContenedor();
@@ -63,8 +63,8 @@ public class ReciclajeController {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
 			}
 
-			List<CategoryDTO> dtos = new ArrayList<>();
-			categories.forEach(category -> dtos.add(categoryToDTO(category)));
+			List<ContenedorDTO> dtos = new ArrayList<>();
+			contenedores.forEach(contenedor -> dtos.add(contenedorToDTO(contenedor)));
 			
 			return new ResponseEntity<>(dtos, HttpStatus.OK);
 		} catch (Exception e) {
@@ -74,7 +74,7 @@ public class ReciclajeController {
 
 	// GET articles by category name
 	@Operation(
-		summary = "Get articles by category name",
+		summary = "Get Planta Reciclaje by category capacidad",
 		description = "Returns a list of all articles for a given category",
 		responses = {
 			@ApiResponse(responseCode = "200", description = "OK: List of articles retrieved successfully"),
@@ -92,7 +92,7 @@ public class ReciclajeController {
 			@Parameter(name = "currency", description = "Currency", required = true, example = "GBP")
 			@RequestParam("currency") String currentCurrency) {
 		try {
-			List<Article> articles = auctionsService.getArticlesByCategoryName(category);
+			List<Article> articles = auctionsService.getPlantasByCategoryName(category);
 						
 			if (articles.isEmpty()) {
 				return new ResponseEntity<>(HttpStatus.NO_CONTENT);
