@@ -5,74 +5,116 @@
  */
 package service;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import es.deusto.sd.auctions.entity.Article;
-import es.deusto.sd.auctions.entity.Bid;
-import es.deusto.sd.auctions.entity.Category;
-import es.deusto.sd.auctions.entity.User;
+import entity.Contenedor;
+import entity.Llenado;
+import entity.PlantaReciclaje;
+
 
 @Service
 public class ReciclajeService {
 
 	// Simulating category and article repositories
-	private static Map<String, Category> categoryRepository = new HashMap<>();
-	private static Map<Long, Article> articleRepository = new HashMap<>();
+	private static Map<Long, PlantaReciclaje> plantaReciclajeRepository = new HashMap<>();
+	private static Map<Long, Contenedor> contenedorRepository = new HashMap<>();
 
-	// Get all categories
-	public List<Category> getCategories() {
-		return categoryRepository.values().stream().toList();
+	// Get all contenedores
+	public List<Contenedor> getContenedores() {
+		return contenedorRepository.values().stream().toList();
 	}
 
-	// Get articles of a specific category
-	public List<Article> getArticlesByCategoryName(String categoryName) {
-		Category category = categoryRepository.get(categoryName);
+	// Get all contenedores
+	public List<PlantaReciclaje> getPlantasReciclaje() {
+		return plantaReciclajeRepository.values().stream().toList();
+	}
 
-		if (category == null) {
-			throw new RuntimeException("Category not found");
+	// Get plantasReciclaje based on capacity
+	public PlantaReciclaje getPlantasReciclajeByCapacity(int capacity) {
+		for (PlantaReciclaje planta : plantaReciclajeRepository.values()) {
+			if (planta.getCapacidad() == capacity) {
+				return planta;
+			}
 		}
+		throw new RuntimeException("Contenedor not found");
+	}
 
-		return category.getArticles();
+	//Get el llenado de un contenedor por fecha
+	public Llenado getLlenadoContenedorByDate(long contenedorId, Date date) {
+		Contenedor contenedor = contenedorRepository.get(contenedorId);
+		if(contenedor.getFechaVaciado().equals(date)) {
+			return contenedor.getNivelDeLlenado();
+		} else {
+			throw new RuntimeException("No data for the given date");
+		}
+	}
+
+	//Consulta del estado de los contenedores de una zona
+	public List<Contenedor> getContenedoresByPostalCode(int postalCode) {
+		return contenedorRepository.values().stream()
+				.filter(contenedor -> contenedor.getCodigoPostal() == postalCode)
+				.toList();
 	}
 	
-	// Get article by id
-	public Article getArticleById(long articleId) {
-		return articleRepository.get(articleId);
+
+	//	public List<Contenedor> getContenedoresByCapacity(int capacity) {
+	//		Contenedor contenedor = contenedorRepository.get(capacity);
+	//		if (contenedor == null) {
+	//			throw new RuntimeException("Contenedor not found");
+	//		}
+	//		
+	//		
+	//	}
+	//	public List<Cont> getArticlesByCategoryName(String categoryName) {
+	//		Category category = categoryRepository.get(categoryName);
+	//
+	//		if (category == null) {
+	//			throw new RuntimeException("Category not found");
+	//		}
+	//
+	//		return category.getArticles();
+	//	}
+	//	
+	//	// Get article by id
+	//	public Contenedor getArticleById(long id) {
+	//		return contenedorRepository.get(articleId);
+	//	}
+
+	//	// Make a bid on an article
+	//	public void makeBid(User user, long articleId, float amount) {
+	//		// Retrieve the article by ID
+	//		Article article = articleRepository.get(articleId);
+	//
+	//		if (article == null) {
+	//			throw new RuntimeException("Article not found");
+	//		}
+	//
+	//		if (amount <= article.getCurrentPrice()) {
+	//			throw new RuntimeException("Bid amount must be greater than the current price");
+	//		}
+	//		
+	//		// Create a new bid and associate it with the article
+	//		Bid bid = new Bid(System.currentTimeMillis(), amount, article, user);
+	//		article.getBids().add(bid);
+	//	}
+
+
+	// Method to add a new Contenedor
+	public void addContenedor(Contenedor contenedor) {
+		if (contenedor != null) {
+			contenedorRepository.putIfAbsent(contenedor.getId(), contenedor);
+		}
 	}
 
-	// Make a bid on an article
-	public void makeBid(User user, long articleId, float amount) {
-		// Retrieve the article by ID
-		Article article = articleRepository.get(articleId);
-
-		if (article == null) {
-			throw new RuntimeException("Article not found");
-		}
-
-		if (amount <= article.getCurrentPrice()) {
-			throw new RuntimeException("Bid amount must be greater than the current price");
-		}
-		
-		// Create a new bid and associate it with the article
-		Bid bid = new Bid(System.currentTimeMillis(), amount, article, user);
-		article.getBids().add(bid);
-	}
-	
-	// Method to add a new category
-	public void addCategory(Category category) {
-		if (category != null) {
-			categoryRepository.putIfAbsent(category.getName(), category);
-		}
-	}
-	
-	// Method to add a new article
-	public void addArticle(Article article) {
-		if (article != null) {
-			articleRepository.put(article.getId(), article);
+	// Method to add a new PlantaReciclaje
+	public void addPlantaReciclaje(PlantaReciclaje planta) {
+		if (planta != null) {
+			plantaReciclajeRepository.put(planta.getId(), planta);
 		}
 	}
 }
