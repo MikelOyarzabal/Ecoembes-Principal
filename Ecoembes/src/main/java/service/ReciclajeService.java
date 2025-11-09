@@ -5,7 +5,6 @@
  */
 package service;
 
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +14,7 @@ import org.springframework.stereotype.Service;
 import entity.Contenedor;
 import entity.Llenado;
 import entity.PlantaReciclaje;
+import entity.User;
 
 
 @Service
@@ -45,9 +45,9 @@ public class ReciclajeService {
 	}
 
 	//Get el llenado de un contenedor por fecha
-	public Llenado getLlenadoContenedorByDate(long contenedorId, Date date) {
+	public Llenado getLlenadoContenedorByDate(long contenedorId, long date) {
 		Contenedor contenedor = contenedorRepository.get(contenedorId);
-		if(contenedor.getFechaVaciado().equals(date)) {
+		if(contenedor.getFechaVaciado()==date) {
 			return contenedor.getNivelDeLlenado();
 		} else {
 			throw new RuntimeException("No data for the given date");
@@ -55,9 +55,9 @@ public class ReciclajeService {
 	}
 
 	//Consulta del estado de los contenedores de una zona en una determinada fecha
-	public List<Contenedor> getContenedoresByDateAndPostalCode(Date date, int postalCode) {
+	public List<Contenedor> getContenedoresByDateAndPostalCode(long date, int postalCode) {
 		return contenedorRepository.values().stream()
-				.filter(contenedor -> contenedor.getCodigoPostal() == postalCode && contenedor.getFechaVaciado().equals(date))
+				.filter(contenedor -> contenedor.getCodigoPostal() == postalCode && contenedor.getFechaVaciado() == date)
 				.toList();
 	}
 	
@@ -111,6 +111,15 @@ public class ReciclajeService {
 	public void addContenedor(Contenedor contenedor) {
 		if (contenedor != null) {
 			contenedorRepository.put(contenedor.getId(), contenedor);
+		}
+	}
+	// Methodo make contenedor
+	public void makeContenedor(User user, long contenedorId,int codigoPostal,float capacidad) {
+		Contenedor contenedor = contenedorRepository.get(contenedorId);
+
+		if (contenedor == null) {
+			Contenedor cont=new Contenedor(contenedorId, codigoPostal, capacidad, Llenado.VERDE, System.currentTimeMillis());
+			contenedorRepository.put(cont.getId(), cont);
 		}
 	}
 
