@@ -6,8 +6,7 @@ import java.util.Optional;
 
 import org.springframework.stereotype.Service;
 
-import entity.User;
-
+import DS_06.Ecoembes.entity.User;
 
 @Service
 public class AuthService {

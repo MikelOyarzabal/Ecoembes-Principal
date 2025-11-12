@@ -8,12 +8,12 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import entity.Contenedor;
-import entity.Llenado;
-import entity.PlantaReciclaje;
-import entity.User;
-import service.AuthService;
-import service.ReciclajeService;
+import DS_06.Ecoembes.entity.Contenedor;
+import DS_06.Ecoembes.entity.Llenado;
+import DS_06.Ecoembes.entity.PlantaReciclaje;
+import DS_06.Ecoembes.entity.User;
+import DS_06.Ecoembes.service.AuthService;
+import DS_06.Ecoembes.service.ReciclajeService;
 
 @Configuration
 public class DataInitializer {

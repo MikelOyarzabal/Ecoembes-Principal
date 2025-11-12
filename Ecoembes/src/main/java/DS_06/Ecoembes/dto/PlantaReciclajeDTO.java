@@ -2,7 +2,7 @@ package DS_06.Ecoembes.dto;
 
 import java.util.ArrayList;
 
-import entity.Contenedor;
+import DS_06.Ecoembes.entity.Contenedor;
 
 public class PlantaReciclajeDTO {
 	private long id;

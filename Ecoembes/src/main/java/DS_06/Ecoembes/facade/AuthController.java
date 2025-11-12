@@ -10,12 +10,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import dto.CredentialsDTO;
+import DS_06.Ecoembes.dto.CredentialsDTO;
+import DS_06.Ecoembes.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.tags.Tag;
-import service.AuthService;
-
+import io.swagger.v3.oas.annotations.tags.Tag; 
 @RestController
 @RequestMapping("/auth")
 @Tag(name = "Authorization Controller", description = "Login and logout operations")

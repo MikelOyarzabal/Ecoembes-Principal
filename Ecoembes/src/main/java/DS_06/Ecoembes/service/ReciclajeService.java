@@ -7,10 +7,10 @@ import java.util.Map;
 
 import org.springframework.stereotype.Service;
 
-import entity.Contenedor;
-import entity.Llenado;
-import entity.PlantaReciclaje;
-import entity.User;
+import DS_06.Ecoembes.entity.Contenedor;
+import DS_06.Ecoembes.entity.Llenado;
+import DS_06.Ecoembes.entity.PlantaReciclaje;
+import DS_06.Ecoembes.entity.User;
 
 
 @Service

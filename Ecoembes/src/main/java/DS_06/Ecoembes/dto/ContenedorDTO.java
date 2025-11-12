@@ -1,6 +1,6 @@
 package DS_06.Ecoembes.dto;
 
-import entity.Llenado;
+import DS_06.Ecoembes.entity.Llenado;
 
 public class ContenedorDTO {
 	private long id;
