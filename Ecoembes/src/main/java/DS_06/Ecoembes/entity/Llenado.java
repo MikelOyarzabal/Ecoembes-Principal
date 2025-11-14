@@ -1,7 +1,7 @@
 package DS_06.Ecoembes.entity;
 
 public enum Llenado {
-	VERDE(100), NARANJA(50), ROJO(0);
+	VERDE(0), NARANJA(50), ROJO(100);
 
     // Campo para guardar el valor asociado
     private final int valor;

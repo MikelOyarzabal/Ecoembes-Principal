@@ -384,8 +384,6 @@ public class ReciclajeController {
 	private PlantaReciclajeDTO plantaReciclajeToDTO(PlantaReciclaje planta) {
 		return new PlantaReciclajeDTO(planta.getId(), 
 				                 planta.getNombre(), 
-				                 planta.getCapacidad(),
-				                 planta.getCapacidadDisponible(),
 				                 planta.getListaContenedor()
 				                 );
 		
