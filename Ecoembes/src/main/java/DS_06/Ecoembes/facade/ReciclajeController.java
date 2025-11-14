@@ -78,7 +78,7 @@ public class ReciclajeController {
 		        @ApiResponse(responseCode = "500", description = "Internal server error")
 		    }
 		)
-	@GetMapping("/contenedores/{contenedorId}/fecha/{date}")
+	@GetMapping("/contenedores/{contenedorId}/llenado/{date}")
 	public ResponseEntity<Llenado> getLlenadoContenedorByDate(
 			@Parameter(name = "contenedorId", description = "ID del contenedor", required = true, example = "123")
 	        @PathVariable("contenedorId") long contenedorId,
@@ -95,7 +95,37 @@ public class ReciclajeController {
 	    }
 	}
 	
+	@Operation(
+            summary = "Get contenedores por código postal y fecha",
+            description = "Permite visualizar el estado de los contenedores de una zona específica (identificada por código postal) en una fecha determinada",
+            responses = {
+                @ApiResponse(responseCode = "200", description = "OK: Lista de contenedores recuperada exitosamente"),
+                @ApiResponse(responseCode = "204", description = "No Content: No se encontraron contenedores para los criterios especificados"),
+                @ApiResponse(responseCode = "500", description = "Internal server error")
+            }
+    )
 	
+	@GetMapping("/contenedores/zona/{codigoPostal}/fecha/{fecha}")
+    public ResponseEntity<List<ContenedorDTO>> getContenedoresByDateAndPostalCode(
+            @Parameter(name = "fecha", description = "Fecha en formato timestamp", required = true, example = "0")
+            @PathVariable("fecha") long fecha,
+            @Parameter(name = "codigoPostal", description = "Código postal de la zona", required = true, example = "28001")
+            @PathVariable("codigoPostal") int codigoPostal) {
+        try {
+            List<Contenedor> contenedores = reciclajeService.getContenedoresByDateAndPostalCode(fecha, codigoPostal);
+
+            if (contenedores.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            }
+
+            List<ContenedorDTO> dtos = new ArrayList<>();
+            contenedores.forEach(contenedor -> dtos.add(contenedorToDTO(contenedor)));
+
+            return new ResponseEntity<>(dtos, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 	
 	// GET all PlantaReciclaje
 	@Operation(
