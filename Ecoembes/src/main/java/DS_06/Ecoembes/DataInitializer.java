@@ -43,7 +43,7 @@ public class DataInitializer {
 
 			logger.info("Users saved!");
 			long emptyingDate = System.currentTimeMillis();
-			Contenedor contenedor1 = new Contenedor(0, 28001, 1000.0f, Llenado.NARANJA, emptyingDate);
+			Contenedor contenedor1 = new Contenedor(0, 28001, 1000.0f, Llenado.NARANJA, 0);
 			Contenedor contenedor2 = new Contenedor(1, 28002, 800.0f, Llenado.ROJO, emptyingDate);
 			Contenedor contenedor3 = new Contenedor(2, 28003, 1200.0f, Llenado.VERDE, emptyingDate);
 			Contenedor contenedor4 = new Contenedor(3, 28004, 900.0f, Llenado.NARANJA, emptyingDate);

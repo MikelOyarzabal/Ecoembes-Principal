@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import DS_06.Ecoembes.dto.ContenedorDTO;
 import DS_06.Ecoembes.dto.PlantaReciclajeDTO;
 import DS_06.Ecoembes.entity.Contenedor;
+import DS_06.Ecoembes.entity.Llenado;
 import DS_06.Ecoembes.entity.PlantaReciclaje;
 import DS_06.Ecoembes.entity.User;
 import DS_06.Ecoembes.service.AuthService;
@@ -41,7 +42,7 @@ public class ReciclajeController {
 		
 	}
 
-	// GET all categories
+	// GET all contenedores
 	@Operation(
 		summary = "Get all Contenedores",
 		description = "Returns a list of all available Contenedores",
@@ -67,6 +68,31 @@ public class ReciclajeController {
 		} catch (Exception e) {
 			return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
 		}
+	}
+	@Operation(
+		    summary = "Get llenado de un contenedor por fecha",
+		    description = "Returns the fill level of a specific container for a given date",
+		    responses = {
+		        @ApiResponse(responseCode = "200", description = "OK: Llenado retrieved successfully"),
+		        @ApiResponse(responseCode = "404", description = "Not Found: No data for the given date"),
+		        @ApiResponse(responseCode = "500", description = "Internal server error")
+		    }
+		)
+	@GetMapping("/contenedores/{contenedorId}/fecha/{date}")
+	public ResponseEntity<Llenado> getLlenadoContenedorByDate(
+			@Parameter(name = "contenedorId", description = "ID del contenedor", required = true, example = "123")
+	        @PathVariable("contenedorId") long contenedorId,
+	        @Parameter(name = "date", description = "Fecha en formato timestamp", required = true, example = "1704067200000")
+	        @PathVariable("date") long date) {
+	    try {
+	        Llenado llenado = reciclajeService.getLlenadoContenedorByDate(contenedorId, date);
+	        return new ResponseEntity<>(llenado, HttpStatus.OK);
+	    } catch (RuntimeException e) {
+	        if (e.getMessage().equals("No data for the given date")) {
+	            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+	        }
+	        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+	    }
 	}
 	
 	
