@@ -110,13 +110,20 @@ public class ReciclajeService {
 		}
 	}
 	// Methodo make contenedor
-	public void makeContenedor(User user, long contenedorId,int codigoPostal,float capacidad) {
-		Contenedor contenedor = contenedorRepository.get(contenedorId);
+	public void makeContenedor(User user, long contenedorId, int codigoPostal, float capacidad) {
+	    Contenedor contenedor = contenedorRepository.get(contenedorId);
 
-		if (contenedor == null) {
-			Contenedor cont=new Contenedor(contenedorId, codigoPostal, capacidad, Llenado.VERDE, System.currentTimeMillis());
-			contenedorRepository.put(cont.getId(), cont);
-		}
+	    if (contenedor != null) {
+	        throw new RuntimeException("Contenedor already exists");
+	    }
+	    
+	    // Aquí puedes agregar más validaciones y lanzar excepciones con los mensajes correspondientes
+	    if (codigoPostal <= 0 || capacidad <= 0) {
+	        throw new RuntimeException("Invalid parameters");
+	    }
+
+	    Contenedor cont = new Contenedor(contenedorId, codigoPostal, capacidad, Llenado.VERDE, System.currentTimeMillis());
+	    contenedorRepository.put(cont.getId(), cont);
 	}
 
 	// Method to add a new PlantaReciclaje
