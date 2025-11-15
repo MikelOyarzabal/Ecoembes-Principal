@@ -23,7 +23,7 @@ public class PlantaReciclaje {
 		this.calcularCapacidades();
 	}
 	private void calcularCapacidades() {
-	    this.capacidad = 0;
+
 	    this.capacidadDisponible = 0;
 	    
 	    if (this.listaContenedor != null && !this.listaContenedor.isEmpty()) {

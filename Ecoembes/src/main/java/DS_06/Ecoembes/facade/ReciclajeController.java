@@ -218,17 +218,21 @@ public class ReciclajeController {
 			reciclajeService.asignarContenedorAPlanta(user, contenedorId, plantaId);
 
 			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-		} catch (Exception e) {
-			switch (e.getMessage()) {
-			case "Contenedor no encontrado":
-			case "Planta de reciclaje no encontrada":
-				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-			case "Capacidad insuficiente en la planta. Disponible: ":
-				return new ResponseEntity<>(HttpStatus.CONFLICT);
-			default:
-				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-			}
-		}
+		  } catch (RuntimeException e) {
+		        String errorMessage = e.getMessage();
+		        if (errorMessage != null) {
+		            if (errorMessage.contains("Contenedor no encontrado") || 
+		                errorMessage.contains("Planta de reciclaje no encontrada")) {
+		                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+		            } else if (errorMessage.contains("Capacidad insuficiente") || 
+		                       errorMessage.contains("El contenedor ya está asignado")) {
+		                return new ResponseEntity<>(HttpStatus.CONFLICT);
+		            }
+		        }
+		        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		    } catch (Exception e) {
+		        return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+		    }
 	}
 
 
