@@ -188,7 +188,48 @@ public class ReciclajeController {
 		}
 	}
 
-	// GET llenado of a contenedor by date
+	// POST asignar Contenedor a PlantaReciclaje
+	@Operation(
+			summary = "Asignar Contenedor a Planta Reciclaje",
+			description = "Permite asignar un contenedor específico a una planta de reciclaje",
+			responses = {
+					@ApiResponse(responseCode = "204", description = "No Content: Contenedor asignado exitosamente"),
+					@ApiResponse(responseCode = "401", description = "Unauthorized: Usuario no autenticado"),
+					@ApiResponse(responseCode = "404", description = "Not Found: Contenedor o Planta de reciclaje no encontrado"),
+					@ApiResponse(responseCode = "409", description = "Conflict: Capacidad insuficiente en la planta"),
+					@ApiResponse(responseCode = "500", description = "Internal server error")
+			}
+			)
+	@PostMapping("/plantasreciclaje/{plantaId}/contenedor/{contenedorId}")
+	public ResponseEntity<Void> asignarContenedorAPlanta(
+			@Parameter(name = "plantaId", description = "ID de la planta de reciclaje", required = true, example = "1")        
+			@PathVariable("plantaId") long plantaId,
+			@Parameter(name = "contenedorId", description = "ID del contenedor", required = true, example = "1")        
+			@PathVariable("contenedorId") long contenedorId,
+			@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Token de autorización en texto plano", required = true)
+			@RequestBody String token) { 
+		try {    	
+			User user = authService.getUserByToken(token);
+
+			if (user == null) {
+				return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+			}
+
+			reciclajeService.asignarContenedorAPlanta(user, contenedorId, plantaId);
+
+			return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+		} catch (Exception e) {
+			switch (e.getMessage()) {
+			case "Contenedor no encontrado":
+			case "Planta de reciclaje no encontrada":
+				return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+			case "Capacidad insuficiente en la planta. Disponible: ":
+				return new ResponseEntity<>(HttpStatus.CONFLICT);
+			default:
+				return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+			}
+		}
+	}
 
 
 	// POST to make a Contenedor
