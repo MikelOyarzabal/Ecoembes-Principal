@@ -33,31 +33,31 @@ public class PlantaReciclaje {
     @Column(name = "tipo_planta")
     private String tipoPlanta; // "PLASSB" o "CONTSOCKET"
 
-    @OneToMany(mappedBy = "plantaReciclaje", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    private List<Contenedor> listaContenedor = new ArrayList<>();
+    @OneToMany(mappedBy = "plantaReciclaje", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Contenedor> contenedores = new ArrayList<>();  // CAMBIADO: Usa 'contenedores' consistentemente
 
-    // Constructor without parameters
+    // Constructor sin parámetros
     public PlantaReciclaje() {
         super();
-        this.listaContenedor = new ArrayList<>();
+        this.contenedores = new ArrayList<>();  // CAMBIADO: Inicializa 'contenedores'
     }
 
-    // Constructor with parameters (without id)
-    public PlantaReciclaje(String nombre, int capacidad, List<Contenedor> listaContenedor) {
+    // Constructor con parámetros (sin id)
+    public PlantaReciclaje(String nombre, int capacidad, List<Contenedor> contenedores) {
         super();
         this.nombre = nombre;
         this.capacidad = capacidad;
-        this.listaContenedor = listaContenedor != null ? listaContenedor : new ArrayList<>();
+        this.contenedores = contenedores != null ? contenedores : new ArrayList<>();  // CAMBIADO
         determinarTipoPorNombre();
         this.calcularCapacidades();
     }
 
-    // Calculate available capacity based on containers
+    // Calcular capacidad disponible basada en contenedores
     public void calcularCapacidades() {
         int capacidadOcupada = 0;
         
-        if (this.listaContenedor != null && !this.listaContenedor.isEmpty()) {
-            for (Contenedor contenedor : this.listaContenedor) {
+        if (this.contenedores != null && !this.contenedores.isEmpty()) {  // CAMBIADO
+            for (Contenedor contenedor : this.contenedores) {  // CAMBIADO
                 float factorOcupacion = calcularFactorOcupacion(contenedor.getNivelDeLlenado());
                 capacidadOcupada += contenedor.getCapacidad() * factorOcupacion;
             }
@@ -66,13 +66,13 @@ public class PlantaReciclaje {
         this.capacidadDisponible = this.capacidad - capacidadOcupada;
     }
 
-    // Helper method to calculate occupancy factor based on fill level
+    // Método helper para calcular factor de ocupación basado en nivel de llenado
     private float calcularFactorOcupacion(Llenado nivelLlenado) {
         if (nivelLlenado == null) return 0.0f;
         return nivelLlenado.getValor() / 100.0f;
     }
     
-    // Determine plant type by name
+    // Determinar tipo de planta por nombre
     @PostLoad
     @PostPersist
     @PostUpdate
@@ -92,34 +92,34 @@ public class PlantaReciclaje {
         }
     }
     
-    // Get the available capacity (calculated, not persisted)
+    // Obtener capacidad disponible (calculada, no persistida)
     public int getCapacidadDisponible() {
         calcularCapacidades();
         return capacidadDisponible;
     }
 
-    // Add a container to the list
+    // Añadir un contenedor a la lista
     public void agregarContenedor(Contenedor contenedor) {
         if (contenedor != null) {
-            if (this.listaContenedor == null) {
-                this.listaContenedor = new ArrayList<>();
+            if (this.contenedores == null) {  // CAMBIADO
+                this.contenedores = new ArrayList<>();
             }
             contenedor.setPlantaReciclaje(this);
-            this.listaContenedor.add(contenedor);
+            this.contenedores.add(contenedor);  // CAMBIADO
             this.calcularCapacidades();
         }
     }
 
-    // Remove a container from the list
+    // Eliminar un contenedor de la lista
     public void eliminarContenedor(Contenedor contenedor) {
-        if (contenedor != null && this.listaContenedor != null) {
-            this.listaContenedor.remove(contenedor);
+        if (contenedor != null && this.contenedores != null) {  // CAMBIADO
+            this.contenedores.remove(contenedor);  // CAMBIADO
             contenedor.setPlantaReciclaje(null);
             this.calcularCapacidades();
         }
     }
 
-    // Getters and setters
+    // Getters y setters
     public long getId() {
         return id;
     }
@@ -154,31 +154,31 @@ public class PlantaReciclaje {
         this.tipoPlanta = tipoPlanta;
     }
 
-    public List<Contenedor> getListaContenedor() {
-        return listaContenedor;
+    public List<Contenedor> getContenedores() {  // CAMBIADO: getContenedores
+        return contenedores;
     }
 
-    public void setListaContenedor(List<Contenedor> listaContenedor) {
-        // Clear existing containers
-        if (this.listaContenedor != null) {
-            for (Contenedor contenedor : this.listaContenedor) {
+    public void setContenedores(List<Contenedor> contenedores) {  // CAMBIADO: setContenedores
+        // Limpiar contenedores existentes
+        if (this.contenedores != null) {
+            for (Contenedor contenedor : this.contenedores) {
                 contenedor.setPlantaReciclaje(null);
             }
-            this.listaContenedor.clear();
+            this.contenedores.clear();
         } else {
-            this.listaContenedor = new ArrayList<>();
+            this.contenedores = new ArrayList<>();
         }
         
-        // Add new containers
-        if (listaContenedor != null) {
-            for (Contenedor contenedor : listaContenedor) {
+        // Añadir nuevos contenedores
+        if (contenedores != null) {
+            for (Contenedor contenedor : contenedores) {
                 agregarContenedor(contenedor);
             }
         }
         this.calcularCapacidades();
     }
 
-    // hashCode and equals
+    // hashCode y equals
     @Override
     public int hashCode() {
         return Objects.hash(id);
@@ -196,7 +196,7 @@ public class PlantaReciclaje {
         return id == other.id;
     }
     
-    // toString method for debugging
+    // toString para depuración
     @Override
     public String toString() {
         return "PlantaReciclaje [id=" + id + 
@@ -204,10 +204,10 @@ public class PlantaReciclaje {
                ", tipoPlanta=" + tipoPlanta +
                ", capacidad=" + capacidad + 
                ", capacidadDisponible=" + getCapacidadDisponible() + 
-               ", contenedores=" + (listaContenedor != null ? listaContenedor.size() : 0) + "]";
+               ", contenedores=" + (contenedores != null ? contenedores.size() : 0) + "]";
     }
     
-    // Transient field for calculated capacity
+    // Campo transiente para capacidad calculada
     @Transient
     private int capacidadDisponible;
 }

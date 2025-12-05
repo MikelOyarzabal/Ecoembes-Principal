@@ -75,7 +75,7 @@ public class DataInitializer {
             
             Date emptyingDate = calendar.getTime();
             
-            // Create containers
+            // Create containers (DO NOT SAVE THEM YET)
             Contenedor contenedor1 = new Contenedor(28001, 1000.0f, Llenado.AMARILLO, emptyingDate);
             Contenedor contenedor2 = new Contenedor(28002, 800.0f, Llenado.ROJO, emptyingDate);
             Contenedor contenedor3 = new Contenedor(28003, 1200.0f, Llenado.VERDE, emptyingDate);
@@ -88,13 +88,6 @@ public class DataInitializer {
             Contenedor contenedor10 = new Contenedor(28010, 700.0f, Llenado.VERDE, emptyingDate);
             Contenedor contenedor11 = new Contenedor(28011, 1300.0f, Llenado.ROJO, emptyingDate);
             Contenedor contenedor12 = new Contenedor(28012, 600.0f, Llenado.AMARILLO, emptyingDate);
-            
-            // Save containers first
-            contenedorRepository.saveAll(List.of(
-                contenedor1, contenedor2, contenedor3, contenedor4,
-                contenedor5, contenedor6, contenedor7, contenedor8,
-                contenedor9, contenedor10, contenedor11, contenedor12
-            ));
             
             // Create recycling plants with specific types
             PlantaReciclaje plantaNorte = new PlantaReciclaje("PlasSB Ltd.", 40000, null);

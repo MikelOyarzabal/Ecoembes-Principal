@@ -2,8 +2,8 @@ package DS_06.Ecoembes.external;
 
 import java.util.Map;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -24,9 +24,10 @@ public class PlasSBGateway implements IPlantaReciclajeGateway {
     @Value("${planta.external.plassb.url:http://localhost:8081/api}")
     private String baseUrl;
     
-    @Autowired
-    public PlasSBGateway(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+    // Constructor with RestTemplateBuilder
+    public PlasSBGateway(RestTemplateBuilder restTemplateBuilder) {
+        this.restTemplate = restTemplateBuilder.build();
+        // Do not set baseUrl here, it's set by @Value
     }
     
     @Override
