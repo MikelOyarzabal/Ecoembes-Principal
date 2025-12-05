@@ -1,36 +1,34 @@
 plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.7'
-	id 'io.spring.dependency-management' version '1.1.7'
+	id 'io.spring.dependency-management' version '1.1.6'
 }
 
-group = 'DS-06'
-version = '0.0.1-SNAPSHOT'
-description = 'Ecoembes project for software design'
-
-java {
-	toolchain {
-		languageVersion = JavaLanguageVersion.of(21)
-	}
-}
+group = 'DS_06.Ecoembes'
+version = '2.0'
 
 repositories {
 	mavenCentral()
 }
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
 dependencies {
-	implementation 'org.springframework.boot:spring-boot-starter-web'
-	// SpringDoc OpenAPI UI Dependency this is needed to use Swagger annotations
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
-	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+	
 	// Spring Boot Starter Web for building web applications
     implementation 'org.springframework.boot:spring-boot-starter-web'
 
 	// SpringDoc OpenAPI UI Dependency this is needed to use Swagger annotations
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.13'
-}
+    
+	// Spring Boot Starter Data JPA for working with JPA and Hibernate
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'	
 
-tasks.named('test') {
-	useJUnitPlatform()
+	// H2 Database for in-memory database
+	runtimeOnly 'com.h2database:h2'	
 }

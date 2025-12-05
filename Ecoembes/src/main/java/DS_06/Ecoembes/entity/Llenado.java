@@ -1,17 +1,17 @@
 package DS_06.Ecoembes.entity;
 
 public enum Llenado {
-	VERDE(0), NARANJA(50), ROJO(100);
-
-    // Campo para guardar el valor asociado
+    VERDE(25),    // 25% ocupado
+    AMARILLO(50), // 50% ocupado
+    ROJO(75),     // 75% ocupado
+    LLENO(100);   // 100% ocupado
+    
     private final int valor;
-
-    // Constructor del enum (siempre es private)
-    private Llenado(int valor) {
+    
+    Llenado(int valor) {
         this.valor = valor;
     }
-
-    // Getter para acceder al valor
+    
     public int getValor() {
         return valor;
     }
