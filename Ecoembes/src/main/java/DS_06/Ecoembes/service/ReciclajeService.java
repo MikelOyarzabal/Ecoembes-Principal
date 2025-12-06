@@ -122,7 +122,7 @@ public class ReciclajeService {
         contenedor.setPlantaReciclaje(planta);
 
         // Si no está ya en la lista, agregarlo
-        if (!planta.getListaContenedor().contains(contenedor)) {
+        if (!planta.getContenedores().contains(contenedor)) {
             planta.agregarContenedor(contenedor);
         }
 

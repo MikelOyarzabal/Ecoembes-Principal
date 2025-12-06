@@ -264,8 +264,8 @@ public class ReciclajeController {
     private PlantaReciclajeDTO plantaReciclajeToDTO(PlantaReciclaje planta) {
         // Convertir la lista de Contenedor a lista de ContenedorDTO
         List<ContenedorDTO> contenedoresDTO = new ArrayList<>();
-        if (planta.getListaContenedor() != null) {
-            for (Contenedor contenedor : planta.getListaContenedor()) {
+        if (planta.getContenedores() != null) {
+            for (Contenedor contenedor : planta.getContenedores()) {
                 contenedoresDTO.add(contenedorToDTO(contenedor));
             }
         }
