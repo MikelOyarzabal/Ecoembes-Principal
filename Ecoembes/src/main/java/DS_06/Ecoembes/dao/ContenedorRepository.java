@@ -9,5 +9,5 @@ import DS_06.Ecoembes.entity.Contenedor;
 
 @Repository
 public interface ContenedorRepository extends JpaRepository<Contenedor, Long> {
-	List<Contenedor> findByNombre(String nombre);
+	List<Contenedor> findById(int id);
 }

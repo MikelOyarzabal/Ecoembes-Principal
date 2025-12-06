@@ -44,26 +44,30 @@ public class ReciclajeController {
         description = "Returns a list of all available Contenedores",
         responses = {
             @ApiResponse(responseCode = "200", description = "OK: List of Contenedores retrieved successfully"),
-            @ApiResponse(responseCode = "204", description = "No Content: No Contendores found"),
+            @ApiResponse(responseCode = "204", description = "No Content: No Contenedores found"),
             @ApiResponse(responseCode = "500", description = "Internal server error")
         }
     )
     @GetMapping("/contenedores")
-    public ResponseEntity<List<ContenedorDTO>> getAllContendores(
+    public ResponseEntity<List<ContenedorDTO>> getAllContenedores(
         @Parameter(name = "token", description = "Token de autenticación", required = false)
-        @RequestParam(required = false) String token) {
+        @RequestParam(value = "token", required = false) String token) {  // CAMBIADO
         try {
             List<Contenedor> contenedores = reciclajeService.getContenedores();
 
-            if (contenedores.isEmpty()) {
+            if (contenedores == null || contenedores.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
             List<ContenedorDTO> dtos = new ArrayList<>();
-            contenedores.forEach(contenedor -> dtos.add(contenedorToDTO(contenedor)));
+            for (Contenedor contenedor : contenedores) {
+                dtos.add(contenedorToDTO(contenedor));
+            }
 
             return new ResponseEntity<>(dtos, HttpStatus.OK);
         } catch (Exception e) {
+            System.err.println("ERROR en getAllContenedores: " + e.getMessage());
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -82,9 +86,9 @@ public class ReciclajeController {
         @Parameter(name = "contenedorId", description = "ID del contenedor", required = true, example = "123")
         @PathVariable("contenedorId") long contenedorId,
         @Parameter(name = "date", description = "Fecha en formato timestamp", required = true, example = "1704067200000")
-        @RequestParam("date") long date,
+        @RequestParam(value = "date") long date,  // CAMBIADO
         @Parameter(name = "token", description = "Token de autenticación", required = false)
-        @RequestParam(required = false) String token) {
+        @RequestParam(value = "token", required = false) String token) {  // CAMBIADO
         try {
             Llenado llenado = reciclajeService.getLlenadoContenedorByDate(contenedorId, date);
             return new ResponseEntity<>(llenado, HttpStatus.OK);
@@ -92,6 +96,8 @@ public class ReciclajeController {
             if (e.getMessage().equals("No data for the given date")) {
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
             }
+            System.err.println("ERROR en getLlenadoContenedorByDate: " + e.getMessage());
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -108,23 +114,27 @@ public class ReciclajeController {
     @GetMapping("/contenedores/zona")
     public ResponseEntity<List<ContenedorDTO>> getContenedoresByDateAndPostalCode(
         @Parameter(name = "fecha", description = "Fecha en formato timestamp", required = true, example = "0")
-        @RequestParam("fecha") long fecha,
+        @RequestParam(value = "fecha") long fecha,  // CAMBIADO
         @Parameter(name = "codigoPostal", description = "Código postal de la zona", required = true, example = "28001")
-        @RequestParam("codigoPostal") int codigoPostal,
+        @RequestParam(value = "codigoPostal") int codigoPostal,  // CAMBIADO
         @Parameter(name = "token", description = "Token de autenticación", required = false)
-        @RequestParam(required = false) String token) {
+        @RequestParam(value = "token", required = false) String token) {  // CAMBIADO
         try {
             List<Contenedor> contenedores = reciclajeService.getContenedoresByDateAndPostalCode(fecha, codigoPostal);
 
-            if (contenedores.isEmpty()) {
+            if (contenedores == null || contenedores.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
             List<ContenedorDTO> dtos = new ArrayList<>();
-            contenedores.forEach(contenedor -> dtos.add(contenedorToDTO(contenedor)));
+            for (Contenedor contenedor : contenedores) {
+                dtos.add(contenedorToDTO(contenedor));
+            }
 
             return new ResponseEntity<>(dtos, HttpStatus.OK);
         } catch (Exception e) {
+            System.err.println("ERROR en getContenedoresByDateAndPostalCode: " + e.getMessage());
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -142,19 +152,23 @@ public class ReciclajeController {
     @GetMapping("/plantasreciclaje")
     public ResponseEntity<List<PlantaReciclajeDTO>> getAllPlantasReciclaje(
         @Parameter(name = "token", description = "Token de autenticación", required = false)
-        @RequestParam(required = false) String token) {
+        @RequestParam(value = "token", required = false) String token) {  // CAMBIADO
         try {
             List<PlantaReciclaje> plantas = reciclajeService.getPlantasReciclaje();
 
-            if (plantas.isEmpty()) {
+            if (plantas == null || plantas.isEmpty()) {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
 
             List<PlantaReciclajeDTO> dtos = new ArrayList<>();
-            plantas.forEach(planta -> dtos.add(plantaReciclajeToDTO(planta)));
+            for (PlantaReciclaje planta : plantas) {
+                dtos.add(plantaReciclajeToDTO(planta));
+            }
 
             return new ResponseEntity<>(dtos, HttpStatus.OK);
         } catch (Exception e) {
+            System.err.println("ERROR en getAllPlantasReciclaje: " + e.getMessage());
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -178,7 +192,7 @@ public class ReciclajeController {
         @Parameter(name = "idContenedor", description = "ID del contenedor", required = true, example = "1")        
         @PathVariable("idContenedor") long contenedorId,
         @Parameter(name = "token", description = "Token de autenticación", required = true)
-        @RequestParam String token) { 
+        @RequestParam(value = "token") String token) {  // CAMBIADO
         try {    
             User user = authService.getUserByToken(token);
 
@@ -191,6 +205,8 @@ public class ReciclajeController {
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (RuntimeException e) {
             String errorMessage = e.getMessage();
+            System.err.println("ERROR en asignarContenedorAPlanta: " + errorMessage);
+            e.printStackTrace();
             if (errorMessage != null) {
                 if (errorMessage.contains("Contenedor no encontrado") || 
                     errorMessage.contains("Planta de reciclaje no encontrada")) {
@@ -202,6 +218,8 @@ public class ReciclajeController {
             }
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         } catch (Exception e) {
+            System.err.println("ERROR en asignarContenedorAPlanta: " + e.getMessage());
+            e.printStackTrace();
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -223,11 +241,11 @@ public class ReciclajeController {
         @Parameter(name = "contenedorId", description = "ID of the contendor", required = true, example = "1")        
         @PathVariable("contenedorId") long id,
         @Parameter(name = "codigoPostal", description = "codigoPostal del contendor", required = true, example = "486236")
-        @RequestParam("codigoPostal") int codigoPostal,
+        @RequestParam(value = "codigoPostal") int codigoPostal,  // CAMBIADO
         @Parameter(name = "capacidad", description = "capacidad del contenedor", required = true, example = "10")
-        @RequestParam("capacidad") float capacidad,
+        @RequestParam(value = "capacidad") float capacidad,  // CAMBIADO
         @Parameter(name = "token", description = "Token de autenticación", required = true)
-        @RequestParam String token) { 
+        @RequestParam(value = "token") String token) {  // CAMBIADO
         try {    
             User user = authService.getUserByToken(token);
 
@@ -239,6 +257,8 @@ public class ReciclajeController {
 
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         } catch (Exception e) {
+            System.err.println("ERROR en makeContenedor: " + e.getMessage());
+            e.printStackTrace();
             switch (e.getMessage()) {
             case "Contenedor not found":
                 return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -252,32 +272,54 @@ public class ReciclajeController {
 
     // Converts a Contenedor to a ContenedorDTO
     private ContenedorDTO contenedorToDTO(Contenedor contenedor) {
-        return new ContenedorDTO(contenedor.getId(), 
-                contenedor.getCodigoPostal(), 
-                contenedor.getCapacidad(),
-                contenedor.getNivelDeLlenado(),
-                contenedor.getFechaVaciado());
+        // Solo incluimos datos básicos, NO relaciones LAZY
+        return new ContenedorDTO(
+            contenedor.getId(), 
+            contenedor.getCodigoPostal(), 
+            contenedor.getCapacidad(),
+            contenedor.getNivelDeLlenado(),
+            contenedor.getFechaVaciado()
+        );
     }
 
-    
     // Converts a PlantaReciclaje to a PlantaReciclajeDTO
     private PlantaReciclajeDTO plantaReciclajeToDTO(PlantaReciclaje planta) {
         // Convertir la lista de Contenedor a lista de ContenedorDTO
         List<ContenedorDTO> contenedoresDTO = new ArrayList<>();
-        if (planta.getContenedores() != null) {
-            for (Contenedor contenedor : planta.getContenedores()) {
-                contenedoresDTO.add(contenedorToDTO(contenedor));
+        
+        // IMPORTANTE: Como los contenedores son LAZY, solo accedemos si ya están cargados
+        // Si no están cargados, dejamos la lista vacía
+        try {
+            List<Contenedor> contenedores = planta.getContenedores();
+            
+            if (contenedores != null && !contenedores.isEmpty()) {
+                for (Contenedor contenedor : contenedores) {
+                    // Solo incluimos datos básicos del contenedor, NO sus relaciones
+                    contenedoresDTO.add(new ContenedorDTO(
+                        contenedor.getId(),
+                        contenedor.getCodigoPostal(),
+                        contenedor.getCapacidad(),
+                        contenedor.getNivelDeLlenado(),
+                        contenedor.getFechaVaciado()
+                    ));
+                }
             }
+        } catch (Exception e) {
+            // Si hay error de LazyInitialization, simplemente no incluimos los contenedores
+            System.err.println("Advertencia: No se pudieron cargar los contenedores para la planta " + planta.getId() + 
+                             ". Error: " + e.getMessage());
         }
         
         // Obtener la capacidad disponible de la entidad
         int capacidadDisponible = planta.getCapacidadDisponible();
         
         // Usar el constructor con 5 parámetros
-        return new PlantaReciclajeDTO(planta.getId(), 
-                                      planta.getNombre(), 
-                                      planta.getCapacidad(),
-                                      capacidadDisponible,
-                                      contenedoresDTO);
+        return new PlantaReciclajeDTO(
+            planta.getId(), 
+            planta.getNombre(), 
+            planta.getCapacidad(),
+            capacidadDisponible,
+            contenedoresDTO
+        );
     }
 }

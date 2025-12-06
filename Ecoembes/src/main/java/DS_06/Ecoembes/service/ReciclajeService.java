@@ -37,13 +37,23 @@ public class ReciclajeService {
     }
 
     // Get all contenedores
+    @Transactional(readOnly = true)
     public List<Contenedor> getContenedores() {
         return contenedorRepository.findAll();
     }
 
-    // Get all plantasReciclaje
+    // Get all plantasReciclaje - Aseguramos que los contenedores se carguen dentro de la transacción
+    @Transactional(readOnly = true)
     public List<PlantaReciclaje> getPlantasReciclaje() {
-        return plantaReciclajeRepository.findAll();
+        List<PlantaReciclaje> plantas = plantaReciclajeRepository.findAll();
+        
+        // Para cada planta, cargamos la colección LAZY de contenedores dentro de la transacción
+        for (PlantaReciclaje planta : plantas) {
+            // Inicializamos la colección accediendo a ella (por ejemplo, obteniendo su tamaño)
+            planta.getContenedores().size(); // Esto fuerza la carga de los contenedores
+        }
+        
+        return plantas;
     }
     
     public void asignarContenedorAPlanta(User usuario, long contenedorId, long plantaId) {
@@ -132,14 +142,23 @@ public class ReciclajeService {
     }
 
     // Get plantasReciclaje based on capacity
+    @Transactional(readOnly = true)
     public PlantaReciclaje getPlantasReciclajeByCapacity(int capacity) {
-        return plantaReciclajeRepository.findAll().stream()
+        List<PlantaReciclaje> plantas = plantaReciclajeRepository.findAll();
+        
+        // Cargamos los contenedores para cada planta dentro de la transacción
+        for (PlantaReciclaje planta : plantas) {
+            planta.getContenedores().size();
+        }
+        
+        return plantas.stream()
             .filter(planta -> planta.getCapacidad() == capacity)
             .findFirst()
             .orElseThrow(() -> new RuntimeException("Planta no encontrada con capacidad: " + capacity));
     }
 
     // Get el llenado de un contenedor por fecha
+    @Transactional(readOnly = true)
     public Llenado getLlenadoContenedorByDate(long contenedorId, long date) {
         Contenedor contenedor = contenedorRepository.findById(contenedorId)
             .orElseThrow(() -> new RuntimeException("Contenedor no encontrado"));
@@ -155,10 +174,14 @@ public class ReciclajeService {
     }
 
     // Consulta del estado de los contenedores de una zona en una determinada fecha
+    @Transactional(readOnly = true)
     public List<Contenedor> getContenedoresByDateAndPostalCode(long date, int postalCode) {
         Date fechaConsulta = new Date(date);
         
-        return contenedorRepository.findAll().stream()
+        List<Contenedor> contenedores = contenedorRepository.findAll();
+        
+        // Filtramos y devolvemos
+        return contenedores.stream()
                 .filter(contenedor -> 
                     contenedor.getCodigoPostal() == postalCode && 
                     contenedor.getFechaVaciado() != null &&
@@ -200,9 +223,13 @@ public class ReciclajeService {
     }
     
     // Consultar estado de una planta (usando gateway si es externa)
+    @Transactional(readOnly = true)
     public String consultarEstadoPlanta(long plantaId) {
         PlantaReciclaje planta = plantaReciclajeRepository.findById(plantaId)
             .orElseThrow(() -> new RuntimeException("Planta no encontrada"));
+        
+        // Cargar contenedores para la planta actual dentro de la transacción
+        planta.getContenedores().size();
         
         // Si es planta local
         if ("DESCONOCIDO".equals(planta.getTipoPlanta()) || planta.getTipoPlanta() == null) {
@@ -221,6 +248,7 @@ public class ReciclajeService {
     }
     
     // Método para probar conexión con plantas externas
+    @Transactional(readOnly = true)
     public boolean probarConexionPlanta(long plantaId) {
         PlantaReciclaje planta = plantaReciclajeRepository.findById(plantaId)
             .orElseThrow(() -> new RuntimeException("Planta no encontrada"));
