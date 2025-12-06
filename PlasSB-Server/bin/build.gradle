@@ -1,0 +1,50 @@
+plugins {
+    id 'java'
+    id 'org.springframework.boot' version '3.5.7'
+    id 'io.spring.dependency-management' version '1.1.6'
+}
+
+group = 'com.plassb'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(21)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    // Spring Boot Starters
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+    
+    // Database
+    runtimeOnly 'com.h2database:h2'
+    
+    // Validation
+    implementation 'org.springframework.boot:spring-boot-starter-validation'
+    
+    // Testing
+    testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    
+    // DevTools
+    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+}
+
+// Para ejecutar en el puerto 8081
+bootRun {
+    systemProperty 'server.port', '8081'
+}
+
+// Para no incluir los tests en el build
+tasks.withType(Test) {
+    enabled = false
+}
