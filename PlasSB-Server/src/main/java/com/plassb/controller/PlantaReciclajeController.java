@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 import com.plassb.dto.CapacidadResponse;
 import com.plassb.dto.RecepcionContenedorRequest;
 import com.plassb.dto.RecepcionContenedorResponse;
+import com.plassb.dto.RegistroPlantaRequest;
 import com.plassb.service.PlantaReciclajeService;
 
 @RestController
@@ -19,8 +20,24 @@ public class PlantaReciclajeController {
         this.plantaService = plantaService;
     }
     
+    @PostMapping("/plantas/registrar")
+    public ResponseEntity<String> registrarPlanta(@RequestBody RegistroPlantaRequest request) {
+        try {
+            plantaService.registrarPlanta(
+                request.getId(), 
+                request.getNombre(), 
+                request.getCapacidadTotal()
+            );
+            return ResponseEntity.ok("{\"mensaje\":\"Planta registrada exitosamente\",\"id\":" + request.getId() + "}");
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body("{\"error\":\"Error registrando planta: " + e.getMessage() + "\"}");
+        }
+    }
+    
     @GetMapping("/plantas/{plantaId}/capacidad")
-    public ResponseEntity<CapacidadResponse> consultarCapacidad(@PathVariable Long plantaId) {
+    public ResponseEntity<CapacidadResponse> consultarCapacidad(@PathVariable("plantaId") Long plantaId) {
+
         try {
             CapacidadResponse capacidad = plantaService.consultarCapacidadDisponible(plantaId);
             return ResponseEntity.ok(capacidad);
@@ -31,7 +48,7 @@ public class PlantaReciclajeController {
     
     @PostMapping("/plantas/{plantaId}/contenedores")
     public ResponseEntity<RecepcionContenedorResponse> recibirContenedor(
-            @PathVariable Long plantaId,
+            @PathVariable("plantaId") Long plantaId,  // ← Añade esto
             @RequestBody RecepcionContenedorRequest request) {
         try {
             RecepcionContenedorResponse response = plantaService.recibirContenedor(plantaId, request);

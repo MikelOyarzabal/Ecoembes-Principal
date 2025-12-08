@@ -1,8 +1,6 @@
 package com.plassb.model;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 
@@ -11,12 +9,11 @@ import jakarta.persistence.Table;
 public class Planta {
     
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     
     private String nombre;
-    private int capacidadTotal;       // Cambiado de Integer a int
-    private int capacidadDisponible;  // Cambiado de Integer a int
+    private int capacidadTotal;
+    private int capacidadDisponible;
     
     // Constructores con int (primitivos)
     public Planta() {}

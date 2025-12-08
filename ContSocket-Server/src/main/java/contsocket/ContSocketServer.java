@@ -35,7 +35,7 @@ public class ContSocketServer {
                              tcpServerSocket.getInetAddress().getHostAddress() + 
                              ":" + tcpServerSocket.getLocalPort() + "' ...");
             System.out.println(" - Planta ID: 2");
-            System.out.println(" - Capacidad inicial: 1000 kg\n");
+            System.out.println(" - Capacidad inicial: 10000 kg\n");
             
             while (true) {
                 new ContSocketService(tcpServerSocket.accept());

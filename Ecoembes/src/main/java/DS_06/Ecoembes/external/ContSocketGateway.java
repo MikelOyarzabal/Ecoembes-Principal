@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
+import java.util.Locale;
 import java.util.StringTokenizer;
 
 import org.springframework.beans.factory.annotation.Value;
@@ -18,12 +19,11 @@ import DS_06.Ecoembes.external.IPlantaReciclajeGateway;
 @Service
 public class ContSocketGateway implements IPlantaReciclajeGateway {
     
-    
     private String host;
     private int port;
     
-	private static String DELIMITER = "#";
-	private static final int ERROR_CODE = -1;
+    private static String DELIMITER = ":";  // ← CAMBIAR de "#" a ":"
+    private static final int ERROR_CODE = -1;
     private static final int SOCKET_TIMEOUT_MS = 5000;
     
     public ContSocketGateway(
@@ -35,46 +35,50 @@ public class ContSocketGateway implements IPlantaReciclajeGateway {
     
     @Override
     public int consultarCapacidadDisponible(long plantaId) {
-		StringTokenizer tokenizer = null;
+        StringTokenizer tokenizer = null;
 
         try (Socket socket = new Socket(host, port)) {
             socket.setSoTimeout(SOCKET_TIMEOUT_MS);
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
 
-            
             // Enviar comando
             String comando = "CONSULTAR_CAPACIDAD:" + plantaId;
             out.writeUTF(comando);
-            //out.flush();
             
-            // Leer respuesta
+            // Leer respuesta: "CAPACIDAD:valor" o "ERROR:mensaje"
             String respuesta = in.readUTF();
-			tokenizer = new StringTokenizer(respuesta, DELIMITER);
+            tokenizer = new StringTokenizer(respuesta, DELIMITER);
 
-			if (tokenizer.hasMoreTokens() && tokenizer.nextToken().equals("OK")) {
-	            if (tokenizer.hasMoreTokens()) {
-	                try {
-	                    return Integer.parseInt(tokenizer.nextToken());
-	                } catch (NumberFormatException e) {
-	                    System.err.println("Error: respuesta no es un número válido");
-	                    return ERROR_CODE;
-	                }
-	            }
-	        }
-	        return ERROR_CODE;
-	        
-	    } catch (UnknownHostException e) {
-	        System.err.println("Error: host desconocido - " + e.getMessage());
-	    } catch (EOFException e) {
-	        System.err.println("Error: EOF - " + e.getMessage());
-	    } catch (IOException e) {
-	        System.err.println("Error de IO: " + e.getMessage());
-	    } catch (Exception e) {
-	        System.err.println("Error inesperado: " + e.getMessage());
-	    }
-	    
-	    return ERROR_CODE;   
+            if (tokenizer.hasMoreTokens()) {
+                String tipo = tokenizer.nextToken();
+                
+                if (tipo.equals("CAPACIDAD") && tokenizer.hasMoreTokens()) {  // ← CAMBIAR de "OK" a "CAPACIDAD"
+                    try {
+                        return Integer.parseInt(tokenizer.nextToken());
+                    } catch (NumberFormatException e) {
+                        System.err.println("Error: respuesta no es un número válido");
+                        return ERROR_CODE;
+                    }
+                } else if (tipo.equals("ERROR")) {
+                    String mensaje = tokenizer.hasMoreTokens() ? tokenizer.nextToken() : "desconocido";
+                    System.err.println("Error del servidor: " + mensaje);
+                    return ERROR_CODE;
+                }
+            }
+            return ERROR_CODE;
+            
+        } catch (UnknownHostException e) {
+            System.err.println("Error: host desconocido - " + e.getMessage());
+        } catch (EOFException e) {
+            System.err.println("Error: EOF - " + e.getMessage());
+        } catch (IOException e) {
+            System.err.println("Error de IO: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("Error inesperado: " + e.getMessage());
+        }
+        
+        return ERROR_CODE;   
     }
     
     @Override
@@ -85,28 +89,24 @@ public class ContSocketGateway implements IPlantaReciclajeGateway {
             
             socket.setSoTimeout(SOCKET_TIMEOUT_MS);
             
-            // Construir mensaje
-            String comando = String.format("ENVIAR_CONTENEDOR:%d:%d:%f:%s",
+            // Construir mensaje - USAR Locale.US para formato con punto decimal
+            String comando = String.format(Locale.US, "ENVIAR_CONTENEDOR:%d:%d:%.2f:%s",  // ← AÑADIR Locale.US
                 plantaId, 
                 contenedor.getId(),
                 contenedor.getCapacidad(),
                 contenedor.getNivelDeLlenado().name());
             
             out.writeUTF(comando);
-            out.flush();
             
+            // Leer respuesta: "OK" o "ERROR:mensaje"
             String respuesta = in.readUTF();
-            StringTokenizer tokenizer = new StringTokenizer(respuesta, DELIMITER);
             
-            if (!tokenizer.hasMoreTokens()) {
-                return false;
-            }
-            
-            String estado = tokenizer.nextToken();
-            if ("OK".equals(estado)) {
+            if (respuesta.equals("OK")) {
                 return true;
-            } else if ("ERROR".equals(estado) && tokenizer.hasMoreTokens()) {
-                String mensajeError = tokenizer.nextToken();
+            } else if (respuesta.startsWith("ERROR")) {
+                StringTokenizer tokenizer = new StringTokenizer(respuesta, DELIMITER);
+                tokenizer.nextToken(); // Saltar "ERROR"
+                String mensajeError = tokenizer.hasMoreTokens() ? tokenizer.nextToken() : "desconocido";
                 throw new RuntimeException("Error del servidor ContSocket: " + mensajeError);
             } else {
                 return false;
@@ -134,9 +134,8 @@ public class ContSocketGateway implements IPlantaReciclajeGateway {
             // Enviar comando
             String comando = "CONSULTAR_ESTADO:" + plantaId;
             out.writeUTF(comando);
-            out.flush();
             
-            // Leer respuesta
+            // Leer respuesta: "ESTADO:valor" o "ERROR:mensaje"
             String respuesta = in.readUTF();
             StringTokenizer tokenizer = new StringTokenizer(respuesta, DELIMITER);
             

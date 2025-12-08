@@ -22,7 +22,7 @@ public class ContSocketService extends Thread {
     private Socket tcpSocket;
     
     private static final String DELIMITER = ":";
-    private static final int CAPACIDAD_INICIAL = 1000; // kg
+    private static final int CAPACIDAD_INICIAL = 10000; // kg
     
     // Almacenamiento compartido entre todas las instancias (static)
     private static final Map<Long, PlantaData> plantas = new ConcurrentHashMap<>();

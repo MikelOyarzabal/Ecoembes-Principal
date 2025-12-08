@@ -244,16 +244,14 @@ public class ReciclajeController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
         }
     )        
-    @PostMapping("/contenedores/{contenedorId}")
-    public ResponseEntity<Void> makeContenedor(
-        @Parameter(name = "contenedorId", description = "ID of the contendor", required = true, example = "1")        
-        @PathVariable("contenedorId") long id,
-        @Parameter(name = "codigoPostal", description = "codigoPostal del contendor", required = true, example = "486236")
-        @RequestParam(value = "codigoPostal") int codigoPostal,  // CAMBIADO
+    @PostMapping("/contenedores")  // ← Quitar /{contenedorId} del path
+    public ResponseEntity<Long> makeContenedor(  // ← Cambiar a ResponseEntity<Long>
+        @Parameter(name = "codigoPostal", description = "codigoPostal del contenedor", required = true, example = "486236")
+        @RequestParam(value = "codigoPostal") int codigoPostal,
         @Parameter(name = "capacidad", description = "capacidad del contenedor", required = true, example = "10")
-        @RequestParam(value = "capacidad") float capacidad,  // CAMBIADO
+        @RequestParam(value = "capacidad") float capacidad,
         @Parameter(name = "token", description = "Token de autenticación", required = true)
-        @RequestParam(value = "token") String token) {  // CAMBIADO
+        @RequestParam(value = "token") String token) {
         try {    
             User user = authService.getUserByToken(token);
 
@@ -261,20 +259,16 @@ public class ReciclajeController {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
 
-            reciclajeService.makeContenedor(user, id, codigoPostal, capacidad);
+            // Llamar al método modificado que retorna el contenedor
+            Contenedor nuevoContenedor = reciclajeService.makeContenedor(user, codigoPostal, capacidad);
 
-            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+            // Retornar el ID real del contenedor creado
+            return new ResponseEntity<>(nuevoContenedor.getId(), HttpStatus.CREATED);
+            
         } catch (Exception e) {
             System.err.println("ERROR en makeContenedor: " + e.getMessage());
             e.printStackTrace();
-            switch (e.getMessage()) {
-            case "Contenedor not found":
-                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-            case "Contenedor already exists":
-                return new ResponseEntity<>(HttpStatus.CONFLICT);
-            default:
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

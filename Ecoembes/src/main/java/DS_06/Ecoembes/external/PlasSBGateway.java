@@ -27,7 +27,34 @@ public class PlasSBGateway implements IPlantaReciclajeGateway {
     // Constructor with RestTemplateBuilder
     public PlasSBGateway(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
-        // Do not set baseUrl here, it's set by @Value
+    }
+    
+    /**
+     * Registra una planta en PlasSB durante la inicialización
+     */
+    public void registrarPlanta(Long id, String nombre, int capacidad) {
+        String url = baseUrl + "/plassb/plantas/registrar";
+        
+        try {
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            Map<String, Object> requestBody = Map.of(
+                "id", id,
+                "nombre", nombre,
+                "capacidadTotal", capacidad
+            );
+            
+            HttpEntity<Map<String, Object>> request = new HttpEntity<>(requestBody, headers);
+            ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
+            
+            if (!response.getStatusCode().is2xxSuccessful()) {
+                throw new RuntimeException("Error al registrar planta: " + response.getBody());
+            }
+            
+        } catch (RestClientException e) {
+            throw new RuntimeException("Error comunicando con PlasSB: " + e.getMessage(), e);
+        }
     }
     
     @Override

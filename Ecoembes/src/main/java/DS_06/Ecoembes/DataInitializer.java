@@ -23,6 +23,7 @@ import DS_06.Ecoembes.entity.Contenedor;
 import DS_06.Ecoembes.entity.Llenado;
 import DS_06.Ecoembes.entity.PlantaReciclaje;
 import DS_06.Ecoembes.entity.User;
+import DS_06.Ecoembes.external.PlantaExternaInitializer;
 import DS_06.Ecoembes.service.AuthService;
 
 @Configuration
@@ -35,7 +36,8 @@ public class DataInitializer {
     CommandLineRunner initData(UserRepository userRepository, 
                                ContenedorRepository contenedorRepository, 
                                PlantaReciclajeRepository plantaReciclajeRepository,
-                               AuthService authService) {
+                               AuthService authService,
+                               PlantaExternaInitializer plantaExternaInitializer) {  // NUEVO
         return args -> {
             // Database is already initialized
             if (userRepository.count() > 0) {                
@@ -93,7 +95,7 @@ public class DataInitializer {
             PlantaReciclaje plantaNorte = new PlantaReciclaje("PlasSB Ltd.", 40000, null);
             plantaNorte.setTipoPlanta("PLASSB");
             
-            PlantaReciclaje plantaSur = new PlantaReciclaje("ContSocket Ltd.", 50000, null);
+            PlantaReciclaje plantaSur = new PlantaReciclaje("ContSocket Ltd.", 10000, null);  // CAMBIADO: capacidad ajustada
             plantaSur.setTipoPlanta("CONTSOCKET");
             
             PlantaReciclaje plantaEste = new PlantaReciclaje("EcoRecicla S.A.", 45000, null);
@@ -143,6 +145,10 @@ public class DataInitializer {
             logger.info("Created {} containers", contenedorRepository.count());
             logger.info("Plant types: PlasSB={}, ContSocket={}, Desconocido={}", 
                 plantaNorte.getTipoPlanta(), plantaSur.getTipoPlanta(), plantaEste.getTipoPlanta());
+            
+            // NUEVO: Registrar plantas en servidores externos
+            logger.info("\n");
+            plantaExternaInitializer.registrarPlantasExternas();
         };
     }
 }

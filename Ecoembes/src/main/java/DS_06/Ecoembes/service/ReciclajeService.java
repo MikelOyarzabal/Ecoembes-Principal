@@ -197,22 +197,21 @@ public class ReciclajeService {
     }
     
     // Method to make contenedor (crear nuevo contenedor)
-    public void makeContenedor(User user, long contenedorId, int codigoPostal, float capacidad) {
-        // Validar que no exista un contenedor con ese ID
-        if (contenedorRepository.existsById(contenedorId)) {
-            throw new RuntimeException("Contenedor already exists");
-        }
-        
+    public Contenedor makeContenedor(User user, int codigoPostal, float capacidad) {  // ← Quitar contenedorId, retornar Contenedor
         // Validaciones
         if (codigoPostal <= 0 || capacidad <= 0) {
             throw new RuntimeException("Invalid parameters");
         }
 
-        // Crear nuevo contenedor (ID será autogenerado, ignoramos el contenedorId del parámetro)
+        // Crear nuevo contenedor (ID será autogenerado)
         Contenedor cont = new Contenedor(codigoPostal, capacidad, Llenado.VERDE, new Date());
         cont.setUserAsignacion(user);
         
-        contenedorRepository.save(cont);
+        // Guardar y forzar persistencia
+        Contenedor saved = contenedorRepository.save(cont);
+        contenedorRepository.flush();  // ← Asegurar que se persiste inmediatamente
+        
+        return saved;  // ← Retornar el contenedor con ID real
     }
 
     // Method to add a new PlantaReciclaje
