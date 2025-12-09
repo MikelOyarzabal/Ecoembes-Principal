@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import DS_06.Ecoembes.dto.CredentialsDTO;
+import DS_06.Ecoembes.entity.User;
 import DS_06.Ecoembes.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -69,6 +70,34 @@ public class AuthController {
         	return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }        
     }
+    
+    @Operation(
+    	    summary = "Sign up to the system",
+    	    description = "Allows a new user to register by providing nickname, email and password. " +
+    	                  "Validates uniqueness of email and nickname.",
+    	    responses = {
+    	        @ApiResponse(responseCode = "204", description = "No Content: User created successfully"),
+    	        @ApiResponse(responseCode = "409", description = "Conflict: User already exists (email or nickname)"),
+    	    }
+    	)
+    	@PostMapping("/signup")
+    	public ResponseEntity<Void> signup(
+    	    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+    	        description = "User registration data (nickname, email, password)", 
+    	        required = true
+    	    )
+    	    @RequestBody User userData) {
+    	    
+    	    try {
+    	        authService.signup(userData);
+    	        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    	    } catch (RuntimeException e) {
+    	        // Usuario ya existe (por email o nickname)
+    	        return new ResponseEntity<>(HttpStatus.CONFLICT);
+    	    }
+    	}
+    
+    
     @Operation(
             summary = "Validate token",
             description = "Validates if a token is still active and valid.",

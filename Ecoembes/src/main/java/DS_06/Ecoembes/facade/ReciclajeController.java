@@ -245,7 +245,7 @@ public class ReciclajeController {
         }
     )        
     @PostMapping("/contenedores")  // ← Quitar /{contenedorId} del path
-    public ResponseEntity<Long> makeContenedor(  // ← Cambiar a ResponseEntity<Long>
+    public ResponseEntity<Long> makeContenedor( 
         @Parameter(name = "codigoPostal", description = "codigoPostal del contenedor", required = true, example = "486236")
         @RequestParam(value = "codigoPostal") int codigoPostal,
         @Parameter(name = "capacidad", description = "capacidad del contenedor", required = true, example = "10")

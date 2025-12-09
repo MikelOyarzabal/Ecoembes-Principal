@@ -1,4 +1,4 @@
-package com.plassb.model;
+package com.plassb.entity;
 
 import java.util.Date;
 

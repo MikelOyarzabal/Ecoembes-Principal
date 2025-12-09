@@ -10,8 +10,8 @@ import org.springframework.transaction.annotation.Transactional;
 import com.plassb.dto.CapacidadResponse;
 import com.plassb.dto.RecepcionContenedorRequest;
 import com.plassb.dto.RecepcionContenedorResponse;
-import com.plassb.model.ContenedorExterno;
-import com.plassb.model.Planta;
+import com.plassb.entity.ContenedorExterno;
+import com.plassb.entity.Planta;
 import com.plassb.repository.ContenedorExternoRepository;
 import com.plassb.repository.PlantaRepository;
 
