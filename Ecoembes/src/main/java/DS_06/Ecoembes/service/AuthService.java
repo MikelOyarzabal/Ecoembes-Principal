@@ -64,63 +64,59 @@ public class AuthService {
         }
     }
     
-    /**
-     * Signup method that creates a new user in the database
-     * @param user User object with nickname, email and password
-     * @throws IllegalArgumentException if validation fails
-     * @throws RuntimeException if user already exists (by email or nickname)
-     */
-    public void signup(User user) {
-        // Validar que user no sea null
-        if (user == null) {
-            throw new IllegalArgumentException("User cannot be null");
-        }
-        
-        // Validar nickname
-        if (user.getNickname() == null || user.getNickname().trim().isEmpty()) {
-            throw new IllegalArgumentException("Nickname cannot be empty");
-        }
-        if (user.getNickname().length() < 3) {
-            throw new IllegalArgumentException("Nickname must be at least 3 characters long");
-        }
-        if (user.getNickname().length() > 20) {
-            throw new IllegalArgumentException("Nickname must be less than 20 characters");
-        }
-        
-        // Validar email
-        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
-            throw new IllegalArgumentException("Email cannot be empty");
-        }
-        // Validación básica de formato de email
-        if (!user.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
-            throw new IllegalArgumentException("Invalid email format");
-        }
-        
-        // Validar password
-        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
-            throw new IllegalArgumentException("Password cannot be empty");
-        }
-        if (user.getPassword().length() < 6) {
-            throw new IllegalArgumentException("Password must be at least 6 characters long");
-        }
-        
-        // Verificar que no existe usuario con ese email
-        Optional<User> existingUserByEmail = userRepository.findByEmail(user.getEmail());
-        if (existingUserByEmail.isPresent()) {
-            throw new RuntimeException("User with email " + user.getEmail() + " already exists");
-        }
-        
-        // Verificar que no existe usuario con ese nickname
-        Optional<User> existingUserByNickname = userRepository.findByNickname(user.getNickname());
-        if (existingUserByNickname.isPresent()) {
-            throw new RuntimeException("User with nickname " + user.getNickname() + " already exists");
-        }
-        
-        // Guardar directamente el user
-        // El ID se genera automáticamente por @GeneratedValue
-        // La lista de contenedoresAsignados se inicializa vacía por defecto
-        userRepository.save(user);
-    }
+    
+//	 Por ahora no funciona bien el signup desde el controlador, lo dejo comentado
+//    public void signup(User user) {
+//        // Validar que user no sea null
+//        if (user == null) {
+//            throw new IllegalArgumentException("User cannot be null");
+//        }
+//        
+//        // Validar nickname
+//        if (user.getNickname() == null || user.getNickname().trim().isEmpty()) {
+//            throw new IllegalArgumentException("Nickname cannot be empty");
+//        }
+//        if (user.getNickname().length() < 3) {
+//            throw new IllegalArgumentException("Nickname must be at least 3 characters long");
+//        }
+//        if (user.getNickname().length() > 20) {
+//            throw new IllegalArgumentException("Nickname must be less than 20 characters");
+//        }
+//        
+//        // Validar email
+//        if (user.getEmail() == null || user.getEmail().trim().isEmpty()) {
+//            throw new IllegalArgumentException("Email cannot be empty");
+//        }
+//        // Validación básica de formato de email
+//        if (!user.getEmail().matches("^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$")) {
+//            throw new IllegalArgumentException("Invalid email format");
+//        }
+//        
+//        // Validar password
+//        if (user.getPassword() == null || user.getPassword().trim().isEmpty()) {
+//            throw new IllegalArgumentException("Password cannot be empty");
+//        }
+//        if (user.getPassword().length() < 6) {
+//            throw new IllegalArgumentException("Password must be at least 6 characters long");
+//        }
+//        
+//        // Verificar que no existe usuario con ese email
+//        Optional<User> existingUserByEmail = userRepository.findByEmail(user.getEmail());
+//        if (existingUserByEmail.isPresent()) {
+//            throw new RuntimeException("User with email " + user.getEmail() + " already exists");
+//        }
+//        
+//        // Verificar que no existe usuario con ese nickname
+//        Optional<User> existingUserByNickname = userRepository.findByNickname(user.getNickname());
+//        if (existingUserByNickname.isPresent()) {
+//            throw new RuntimeException("User with nickname " + user.getNickname() + " already exists");
+//        }
+//        
+//        // Guardar directamente el user
+//        // El ID se genera automáticamente por @GeneratedValue
+//        // La lista de contenedoresAsignados se inicializa vacía por defecto
+//        userRepository.save(user);
+//    }
     
  // Method to get the user based on the token (ahora valida estado)
     public User getUserByToken(String token) {

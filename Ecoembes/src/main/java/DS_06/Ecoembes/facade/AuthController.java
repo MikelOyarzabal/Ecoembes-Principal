@@ -71,31 +71,31 @@ public class AuthController {
         }        
     }
     
-    @Operation(
-    	    summary = "Sign up to the system",
-    	    description = "Allows a new user to register by providing nickname, email and password. " +
-    	                  "Validates uniqueness of email and nickname.",
-    	    responses = {
-    	        @ApiResponse(responseCode = "204", description = "No Content: User created successfully"),
-    	        @ApiResponse(responseCode = "409", description = "Conflict: User already exists (email or nickname)"),
-    	    }
-    	)
-    	@PostMapping("/signup")
-    	public ResponseEntity<Void> signup(
-    	    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-    	        description = "User registration data (nickname, email, password)", 
-    	        required = true
-    	    )
-    	    @RequestBody User userData) {
-    	    
-    	    try {
-    	        authService.signup(userData);
-    	        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-    	    } catch (RuntimeException e) {
-    	        // Usuario ya existe (por email o nickname)
-    	        return new ResponseEntity<>(HttpStatus.CONFLICT);
-    	    }
-    	}
+//    @Operation(
+//    	    summary = "Sign up to the system",
+//    	    description = "Allows a new user to register by providing nickname, email and password. " +
+//    	                  "Validates uniqueness of email and nickname.",
+//    	    responses = {
+//    	        @ApiResponse(responseCode = "204", description = "No Content: User created successfully"),
+//    	        @ApiResponse(responseCode = "409", description = "Conflict: User already exists (email or nickname)"),
+//    	    }
+//    	)
+//    	@PostMapping("/signup")
+//    	public ResponseEntity<Void> signup(
+//    	    @io.swagger.v3.oas.annotations.parameters.RequestBody(
+//    	        description = "User registration data (nickname, email, password)", 
+//    	        required = true
+//    	    )
+//    	    @RequestBody User userData) {
+//    	    
+//    	    try {
+//    	        authService.signup(userData);
+//    	        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+//    	    } catch (RuntimeException e) {
+//    	        // Usuario ya existe (por email o nickname)
+//    	        return new ResponseEntity<>(HttpStatus.CONFLICT);
+//    	    }
+//    	}
     
     
     @Operation(
