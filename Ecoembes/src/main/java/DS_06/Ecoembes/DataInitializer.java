@@ -95,7 +95,7 @@ public class DataInitializer {
             PlantaReciclaje plantaNorte = new PlantaReciclaje("PlasSB Ltd.", 40000, null);
             plantaNorte.setTipoPlanta("PLASSB");
             
-            PlantaReciclaje plantaSur = new PlantaReciclaje("ContSocket Ltd.", 10000, null);  // CAMBIADO: capacidad ajustada
+            PlantaReciclaje plantaSur = new PlantaReciclaje("ContSocket Ltd.", 10000, null); 
             plantaSur.setTipoPlanta("CONTSOCKET");
             
             PlantaReciclaje plantaEste = new PlantaReciclaje("EcoRecicla S.A.", 45000, null);
