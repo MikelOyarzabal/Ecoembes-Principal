@@ -176,10 +176,12 @@ public class ReciclajeController {
         }
     }
 
-    // GET capacidad disponible de una planta - MODIFICADO: devuelve solo el número
+    // GET capacidad disponible de una planta CON FECHA
     @Operation(
-        summary = "Get capacidad disponible de una planta",
-        description = "Devuelve la capacidad disponible de una planta específica como un número entero",
+        summary = "Get capacidad disponible de una planta para una fecha",
+        description = "Devuelve la capacidad disponible de una planta específica como un número entero. " +
+                      "Si se proporciona una fecha, consulta la capacidad para ese día específico. " +
+                      "Si no se proporciona fecha, devuelve la capacidad actual.",
         responses = {
             @ApiResponse(responseCode = "200", description = "OK: Capacidad obtenida exitosamente"),
             @ApiResponse(responseCode = "404", description = "Not Found: Planta no encontrada"),
@@ -190,10 +192,23 @@ public class ReciclajeController {
     public ResponseEntity<Integer> getCapacidadDisponible(
         @Parameter(name = "idPlanta", description = "ID de la planta de reciclaje", required = true, example = "1")
         @PathVariable("idPlanta") long plantaId,
+        @Parameter(name = "fecha", description = "Fecha para consultar capacidad (formato: yyyy-MM-dd). Si no se proporciona, se consulta la capacidad actual.", 
+                   required = false, example = "2025-12-15")
+        @RequestParam(value = "fecha", required = false) 
+        @DateTimeFormat(pattern = "yyyy-MM-dd") Date fecha,
         @Parameter(name = "token", description = "Token de autenticación", required = false)
         @RequestParam(value = "token", required = false) String token) {
         try {
-            int capacidad = reciclajeService.consultarCapacidadDisponible(plantaId);
+            int capacidad;
+            
+            if (fecha != null) {
+                // Consultar capacidad para una fecha específica
+                capacidad = reciclajeService.consultarCapacidadDisponible(plantaId, fecha);
+            } else {
+                // Consultar capacidad actual (sin fecha)
+                capacidad = reciclajeService.consultarCapacidadDisponible(plantaId);
+            }
+            
             return new ResponseEntity<>(capacidad, HttpStatus.OK);
         } catch (RuntimeException e) {
             if (e.getMessage().contains("no encontrada")) {
@@ -205,7 +220,7 @@ public class ReciclajeController {
         }
     }
 
-    // POST asignar LISTA de Contenedores a PlantaReciclaje - MODIFICADO
+    // POST asignar LISTA de Contenedores a PlantaReciclaje
     @Operation(
         summary = "Asignar lista de Contenedores a Planta Reciclaje",
         description = "Permite asignar una lista de contenedores a una planta de reciclaje",
