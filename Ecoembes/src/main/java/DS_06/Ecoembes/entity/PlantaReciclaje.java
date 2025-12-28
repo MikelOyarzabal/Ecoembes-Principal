@@ -56,20 +56,13 @@ public class PlantaReciclaje {
     public void calcularCapacidades() {
         int capacidadOcupada = 0;
         
-        if (this.contenedores != null && !this.contenedores.isEmpty()) {  // CAMBIADO
-            for (Contenedor contenedor : this.contenedores) {  // CAMBIADO
-                float factorOcupacion = calcularFactorOcupacion(contenedor.getNivelDeLlenado());
-                capacidadOcupada += contenedor.getCapacidad() * factorOcupacion;
+        if (this.contenedores != null && !this.contenedores.isEmpty()) {
+            for (Contenedor contenedor : this.contenedores) {
+                capacidadOcupada += contenedor.getOcupado();
             }
         }
         
         this.capacidadDisponible = this.capacidad - capacidadOcupada;
-    }
-
-    // Método helper para calcular factor de ocupación basado en nivel de llenado
-    private float calcularFactorOcupacion(Llenado nivelLlenado) {
-        if (nivelLlenado == null) return 0.0f;
-        return nivelLlenado.getValor() / 100.0f;
     }
     
     // Determinar tipo de planta por nombre
@@ -95,7 +88,8 @@ public class PlantaReciclaje {
     // Obtener capacidad disponible (calculada, no persistida)
     public int getCapacidadDisponible() {
         calcularCapacidades();
-        return capacidadDisponible;
+        // Asegurar que nunca retorne un valor negativo
+        return Math.max(0, capacidadDisponible);
     }
 
     // Añadir un contenedor a la lista

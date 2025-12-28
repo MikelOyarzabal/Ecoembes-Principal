@@ -73,7 +73,8 @@ public class Contenedor {
         if (nivelDeLlenado == null || capacidad == 0) {
             return 0;
         }
-        return (int) (this.getCapacidad() * (100 - nivelDeLlenado.getValor()) / 100.0f);
+        // Calcula cuánto está OCUPADO (no cuánto falta)
+        return (int) (this.capacidad * nivelDeLlenado.getValor() / 100.0f);
     }
 
     // Get the current occupancy percentage (opposite of ocupado)

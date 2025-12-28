@@ -1,8 +1,3 @@
-/**
- * This code is based on solutions provided by ChatGPT 4o and 
- * adapted using GitHub Copilot. It has been thoroughly reviewed 
- * and validated to ensure correctness and that it is free of errors.
- */
 package DS_06.Ecoembes;
 
 import java.util.Calendar;
@@ -37,7 +32,7 @@ public class DataInitializer {
                                ContenedorRepository contenedorRepository, 
                                PlantaReciclajeRepository plantaReciclajeRepository,
                                AuthService authService,
-                               PlantaExternaInitializer plantaExternaInitializer) {  // NUEVO
+                               PlantaExternaInitializer plantaExternaInitializer) {
         return args -> {
             // Database is already initialized
             if (userRepository.count() > 0) {                
@@ -77,7 +72,10 @@ public class DataInitializer {
             
             Date emptyingDate = calendar.getTime();
             
-            // Create containers (DO NOT SAVE THEM YET)
+            // ═══════════════════════════════════════════════════════════════
+            // CREAR CONTENEDORES SIN ASIGNAR A PLANTAS
+            // ═══════════════════════════════════════════════════════════════
+            
             Contenedor contenedor1 = new Contenedor(28001, 1000.0f, Llenado.AMARILLO, emptyingDate);
             Contenedor contenedor2 = new Contenedor(28002, 800.0f, Llenado.ROJO, emptyingDate);
             Contenedor contenedor3 = new Contenedor(28003, 1200.0f, Llenado.VERDE, emptyingDate);
@@ -91,7 +89,17 @@ public class DataInitializer {
             Contenedor contenedor11 = new Contenedor(28011, 1300.0f, Llenado.ROJO, emptyingDate);
             Contenedor contenedor12 = new Contenedor(28012, 600.0f, Llenado.AMARILLO, emptyingDate);
             
-            // Create recycling plants with specific types
+            // Guardar contenedores sin asignar a plantas
+            contenedorRepository.saveAll(List.of(
+                contenedor1, contenedor2, contenedor3, contenedor4,
+                contenedor5, contenedor6, contenedor7, contenedor8,
+                contenedor9, contenedor10, contenedor11, contenedor12
+            ));
+            
+            // ═══════════════════════════════════════════════════════════════
+            // CREAR PLANTAS DE RECICLAJE VACÍAS (SIN CONTENEDORES)
+            // ═══════════════════════════════════════════════════════════════
+            
             PlantaReciclaje plantaNorte = new PlantaReciclaje("PlasSB Ltd.", 40000, null);
             plantaNorte.setTipoPlanta("PLASSB");
             
@@ -101,28 +109,15 @@ public class DataInitializer {
             PlantaReciclaje plantaEste = new PlantaReciclaje("EcoRecicla S.A.", 45000, null);
             plantaEste.setTipoPlanta("DESCONOCIDO");
             
-            // Add containers to recycling plants
-            plantaNorte.agregarContenedor(contenedor1);
-            plantaNorte.agregarContenedor(contenedor2);
-            plantaNorte.agregarContenedor(contenedor5);
-            plantaNorte.agregarContenedor(contenedor8);
-            
-            plantaSur.agregarContenedor(contenedor3);
-            plantaSur.agregarContenedor(contenedor4);
-            plantaSur.agregarContenedor(contenedor6);
-            plantaSur.agregarContenedor(contenedor9);
-            plantaSur.agregarContenedor(contenedor10);
-            
-            plantaEste.agregarContenedor(contenedor7);
-            plantaEste.agregarContenedor(contenedor11);
-            plantaEste.agregarContenedor(contenedor12);
-            
-            // Save recycling plants (containers will be saved due to cascade)
+            // Guardar plantas SIN contenedores asignados
             plantaReciclajeRepository.save(plantaNorte);
             plantaReciclajeRepository.save(plantaSur);
             plantaReciclajeRepository.save(plantaEste);
             
-            // Assign users to containers
+            // ═══════════════════════════════════════════════════════════════
+            // ASIGNAR USUARIOS A CONTENEDORES (OPCIONAL - para auditoría)
+            // ═══════════════════════════════════════════════════════════════
+            
             reciclador1.agregarContenedor(contenedor1);
             reciclador2.agregarContenedor(contenedor2);
             reciclador3.agregarContenedor(contenedor3);
@@ -142,11 +137,11 @@ public class DataInitializer {
             
             logger.info("Database initialization completed!");
             logger.info("Created {} recycling plants", plantaReciclajeRepository.count());
-            logger.info("Created {} containers", contenedorRepository.count());
+            logger.info("Created {} containers (NOT ASSIGNED to plants)", contenedorRepository.count());
             logger.info("Plant types: PlasSB={}, ContSocket={}, Desconocido={}", 
                 plantaNorte.getTipoPlanta(), plantaSur.getTipoPlanta(), plantaEste.getTipoPlanta());
             
-            // NUEVO: Registrar plantas en servidores externos
+            // Registrar plantas en servidores externos
             logger.info("\n");
             plantaExternaInitializer.registrarPlantasExternas();
         };

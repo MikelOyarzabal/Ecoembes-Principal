@@ -5,6 +5,7 @@
  */
 package DS_06.Ecoembes.service;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
@@ -155,77 +156,91 @@ public class ReciclajeService {
         return nivelLlenado.getValor() / 100.0f;
     }
     
-    // Asignar lista de contenedores a una planta
+    // MÉTODO: Asignar MULTIPLES contenedores a una planta
     @Transactional
     public void asignarContenedoresAPlanta(User usuario, List<Long> idsContenedores, long plantaId) {
         // Validar que la lista no esté vacía
         if (idsContenedores == null || idsContenedores.isEmpty()) {
             throw new RuntimeException("La lista de contenedores no puede estar vacía");
         }
-        
+
         // Obtener la planta
         PlantaReciclaje planta = plantaReciclajeRepository.findById(plantaId)
             .orElseThrow(() -> new RuntimeException("Planta de reciclaje no encontrada"));
-        
+
         // Obtener todos los contenedores
         List<Contenedor> contenedores = contenedorRepository.findAllById(idsContenedores);
-        
+
         // Validar que se encontraron todos los contenedores
         if (contenedores.size() != idsContenedores.size()) {
             throw new RuntimeException("Uno o más contenedores no fueron encontrados");
         }
-        
-        // Determinar tipo de planta si no está establecido
-        if (planta.getTipoPlanta() == null || "DESCONOCIDO".equals(planta.getTipoPlanta())) {
-            planta.determinarTipoPorNombre();
+
+        // Calcular capacidad total necesaria
+        int capacidadNecesaria = 0;
+        for (Contenedor contenedor : contenedores) {
+            // Verificar si ya está asignado
+            if (contenedor.getPlantaReciclaje() != null) {
+                throw new RuntimeException("El contenedor " + contenedor.getId() + " ya está asignado a otra planta");
+            }
+            capacidadNecesaria += contenedor.getOcupado();
         }
-        
-        // Si el tipo es DESCONOCIDO, usar lógica local
-        if ("DESCONOCIDO".equals(planta.getTipoPlanta())) {
-            asignarContenedoresLocal(usuario, contenedores, planta);
-            return;
+
+        // Verificar capacidad disponible
+        int capacidadDisponible = planta.getCapacidadDisponible();
+        if (capacidadDisponible < capacidadNecesaria) {
+            throw new RuntimeException("Capacidad insuficiente en la planta. Necesario: " +
+                                     capacidadNecesaria + ", Disponible: " + capacidadDisponible);
         }
-        
-        // Si es planta externa, usar gateway
-        try {
-            IPlantaReciclajeGateway gateway = gatewayFactory.createGateway(planta.getTipoPlanta());
-            
-            // 1. Consultar capacidad disponible
-            int capacidadDisponible = gateway.consultarCapacidadDisponible(plantaId);
-            
-            // 2. Calcular capacidad total necesaria
-            int capacidadNecesaria = 0;
-            for (Contenedor contenedor : contenedores) {
-                capacidadNecesaria += contenedor.getOcupado();
-            }
-            
-            // 3. Verificar capacidad
-            if (capacidadDisponible < capacidadNecesaria) {
-                throw new RuntimeException("Capacidad insuficiente en la planta externa. Necesario: " + 
-                                         capacidadNecesaria + ", Disponible: " + capacidadDisponible);
-            }
-            
-            // 4. Enviar contenedores uno por uno
-            for (Contenedor contenedor : contenedores) {
-                boolean exito = gateway.enviarContenedor(plantaId, contenedor);
-                if (!exito) {
-                    throw new RuntimeException("Error al enviar contenedor " + contenedor.getId() + 
-                                             " a la planta externa");
-                }
-            }
-            
-            // 5. Actualizar estado localmente
-            for (Contenedor contenedor : contenedores) {
-                actualizarAsignacionLocal(usuario, contenedor, planta);
-            }
-            
-            logger.info("Asignados {} contenedores a planta externa {}", contenedores.size(), plantaId);
-            
-        } catch (Exception e) {
-            logger.warn("Error al comunicar con planta externa {}, intentando asignación local: {}", 
-                       planta.getTipoPlanta(), e.getMessage());
-            asignarContenedoresLocal(usuario, contenedores, planta);
+
+        // Asignar todos los contenedores
+        for (Contenedor contenedor : contenedores) {
+            contenedor.setPlantaReciclaje(planta);
+            contenedor.setFechaVaciado(new Date());
+            contenedorRepository.save(contenedor);
         }
+
+        // La capacidad se recalcula automáticamente al llamar getCapacidadDisponible()
+        // NO llamar a setCapacidadDisponible() porque no existe
+        
+        logger.info("Usuario {} asignó {} contenedores a planta {}. Capacidad disponible ahora: {}", 
+                    usuario.getEmail(), contenedores.size(), plantaId, planta.getCapacidadDisponible());
+    }
+
+    // MÉTODO AUXILIAR: Asignar UN SOLO contenedor a una planta
+    @Transactional
+    public void asignarContenedorAPlanta(User usuario, long contenedorId, long plantaId) {
+        // Obtener el contenedor
+        Contenedor contenedor = contenedorRepository.findById(contenedorId)
+            .orElseThrow(() -> new RuntimeException("Contenedor no encontrado"));
+
+        // Obtener la planta
+        PlantaReciclaje planta = plantaReciclajeRepository.findById(plantaId)
+            .orElseThrow(() -> new RuntimeException("Planta de reciclaje no encontrada"));
+
+        // Verificar si ya está asignado
+        if (contenedor.getPlantaReciclaje() != null) {
+            throw new RuntimeException("El contenedor ya está asignado a otra planta");
+        }
+
+        // Verificar capacidad disponible
+        int capacidadNecesaria = contenedor.getOcupado();
+        int capacidadDisponible = planta.getCapacidadDisponible();
+
+        if (capacidadDisponible < capacidadNecesaria) {
+            throw new RuntimeException("Capacidad insuficiente en la planta. Necesario: " +
+                                     capacidadNecesaria + ", Disponible: " + capacidadDisponible);
+        }
+
+        // Asignar contenedor
+        contenedor.setPlantaReciclaje(planta);
+        contenedor.setFechaVaciado(new Date());
+        contenedorRepository.save(contenedor);
+
+        // La capacidad se recalcula automáticamente
+        
+        logger.info("Usuario {} asignó contenedor {} a planta {}. Capacidad disponible ahora: {}", 
+                    usuario.getEmail(), contenedorId, plantaId, planta.getCapacidadDisponible());
     }
     
     // Método helper para asignar lista de contenedores localmente
@@ -250,60 +265,129 @@ public class ReciclajeService {
         logger.info("Asignados {} contenedores localmente a planta {}", contenedores.size(), planta.getId());
     }
     
-    // MANTENER: Método original para asignar un solo contenedor (compatibilidad)
-    @Transactional
-    public void asignarContenedorAPlanta(User usuario, long contenedorId, long plantaId) {
-        // Obtener contenedor
-        Contenedor contenedor = contenedorRepository.findById(contenedorId)
-            .orElseThrow(() -> new RuntimeException("Contenedor no encontrado"));
+//    // MANTENER: Método original para asignar un solo contenedor (compatibilidad)
+//    @Transactional
+//    public void asignarContenedorAPlanta(User usuario, long contenedorId, long plantaId) {
+//        // Obtener contenedor
+//        Contenedor contenedor = contenedorRepository.findById(contenedorId)
+//            .orElseThrow(() -> new RuntimeException("Contenedor no encontrado"));
+//
+//        // Obtener planta
+//        PlantaReciclaje planta = plantaReciclajeRepository.findById(plantaId)
+//            .orElseThrow(() -> new RuntimeException("Planta de reciclaje no encontrada"));
+//
+//        // Determinar tipo de planta si no está establecido
+//        if (planta.getTipoPlanta() == null || "DESCONOCIDO".equals(planta.getTipoPlanta())) {
+//            planta.determinarTipoPorNombre();
+//        }
+//
+//        // Si el tipo es DESCONOCIDO, usar lógica local
+//        if ("DESCONOCIDO".equals(planta.getTipoPlanta())) {
+//            asignarContenedorLocal(usuario, contenedor, planta);
+//            return;
+//        }
+//
+//        // Obtener gateway para planta externa
+//        IPlantaReciclajeGateway gateway;
+//        try {
+//            gateway = gatewayFactory.createGateway(planta.getTipoPlanta());
+//        } catch (IllegalArgumentException e) {
+//            throw new RuntimeException("Tipo de planta no soportado: " + planta.getTipoPlanta());
+//        }
+//
+//        try {
+//            // 1. Consultar capacidad disponible en planta externa
+//            int capacidadDisponibleExterna = gateway.consultarCapacidadDisponible(plantaId);
+//            
+//            // 2. Verificar capacidad externa
+//            if (capacidadDisponibleExterna < contenedor.getOcupado()) {
+//                throw new RuntimeException("Capacidad insuficiente en la planta externa. Disponible: " + capacidadDisponibleExterna);
+//            }
+//            
+//            // 3. Enviar contenedor a planta externa
+//            boolean exito = gateway.enviarContenedor(plantaId, contenedor);
+//            if (!exito) {
+//                throw new RuntimeException("Error al enviar contenedor a la planta externa");
+//            }
+//            
+//            // 4. Actualizar estado localmente
+//            actualizarAsignacionLocal(usuario, contenedor, planta);
+//            
+//        } catch (Exception e) {
+//            // Si falla la comunicación con la planta externa, intentar asignación local
+//            logger.warn("Error al comunicar con planta externa {}, intentando asignación local: {}", 
+//                       planta.getTipoPlanta(), e.getMessage());
+//            asignarContenedorLocal(usuario, contenedor, planta);
+//        }
+//    }
+    
+    // MÉTODO DE DIAGNÓSTICO - Añádelo TEMPORALMENTE a ReciclajeService.java
 
-        // Obtener planta
-        PlantaReciclaje planta = plantaReciclajeRepository.findById(plantaId)
-            .orElseThrow(() -> new RuntimeException("Planta de reciclaje no encontrada"));
-
-        // Determinar tipo de planta si no está establecido
-        if (planta.getTipoPlanta() == null || "DESCONOCIDO".equals(planta.getTipoPlanta())) {
-            planta.determinarTipoPorNombre();
+    @Transactional(readOnly = true)
+    public List<Contenedor> getContenedoresByDateAndPostalCode(Date date, int postalCode) {
+        List<Contenedor> contenedores = contenedorRepository.findAll();
+        
+        // DEBUG: Ver qué está pasando
+        System.out.println("======= DEBUG BÚSQUEDA POR ZONA =======");
+        System.out.println("Fecha recibida: " + date);
+        System.out.println("Código postal buscado: " + postalCode);
+        System.out.println("Total contenedores en BD: " + contenedores.size());
+        
+        // Mostrar todos los contenedores
+        for (Contenedor c : contenedores) {
+            System.out.println("  - Contenedor ID: " + c.getId() + 
+                             ", CP: " + c.getCodigoPostal() + 
+                             ", Fecha Vaciado: " + c.getFechaVaciado());
         }
-
-        // Si el tipo es DESCONOCIDO, usar lógica local
-        if ("DESCONOCIDO".equals(planta.getTipoPlanta())) {
-            asignarContenedorLocal(usuario, contenedor, planta);
-            return;
-        }
-
-        // Obtener gateway para planta externa
-        IPlantaReciclajeGateway gateway;
-        try {
-            gateway = gatewayFactory.createGateway(planta.getTipoPlanta());
-        } catch (IllegalArgumentException e) {
-            throw new RuntimeException("Tipo de planta no soportado: " + planta.getTipoPlanta());
-        }
-
-        try {
-            // 1. Consultar capacidad disponible en planta externa
-            int capacidadDisponibleExterna = gateway.consultarCapacidadDisponible(plantaId);
-            
-            // 2. Verificar capacidad externa
-            if (capacidadDisponibleExterna < contenedor.getOcupado()) {
-                throw new RuntimeException("Capacidad insuficiente en la planta externa. Disponible: " + capacidadDisponibleExterna);
-            }
-            
-            // 3. Enviar contenedor a planta externa
-            boolean exito = gateway.enviarContenedor(plantaId, contenedor);
-            if (!exito) {
-                throw new RuntimeException("Error al enviar contenedor a la planta externa");
-            }
-            
-            // 4. Actualizar estado localmente
-            actualizarAsignacionLocal(usuario, contenedor, planta);
-            
-        } catch (Exception e) {
-            // Si falla la comunicación con la planta externa, intentar asignación local
-            logger.warn("Error al comunicar con planta externa {}, intentando asignación local: {}", 
-                       planta.getTipoPlanta(), e.getMessage());
-            asignarContenedorLocal(usuario, contenedor, planta);
-        }
+        
+        // Crear Calendar para comparar solo fechas (sin horas)
+        Calendar calConsulta = Calendar.getInstance();
+        calConsulta.setTime(date);
+        calConsulta.set(Calendar.HOUR_OF_DAY, 0);
+        calConsulta.set(Calendar.MINUTE, 0);
+        calConsulta.set(Calendar.SECOND, 0);
+        calConsulta.set(Calendar.MILLISECOND, 0);
+        
+        System.out.println("Fecha normalizada para búsqueda: " + calConsulta.getTime());
+        
+        // Filtramos comparando solo la fecha (sin hora)
+        List<Contenedor> resultado = contenedores.stream()
+                .filter(contenedor -> {
+                    if (contenedor.getCodigoPostal() != postalCode) {
+                        System.out.println("  - Contenedor " + contenedor.getId() + " descartado por CP");
+                        return false;
+                    }
+                    
+                    if (contenedor.getFechaVaciado() == null) {
+                        System.out.println("  - Contenedor " + contenedor.getId() + " descartado por fecha null");
+                        return false;
+                    }
+                    
+                    // Comparar solo fechas (día/mes/año), ignorando horas
+                    Calendar calContenedor = Calendar.getInstance();
+                    calContenedor.setTime(contenedor.getFechaVaciado());
+                    
+                    boolean coincide = calContenedor.get(Calendar.YEAR) == calConsulta.get(Calendar.YEAR) &&
+                           calContenedor.get(Calendar.MONTH) == calConsulta.get(Calendar.MONTH) &&
+                           calContenedor.get(Calendar.DAY_OF_MONTH) == calConsulta.get(Calendar.DAY_OF_MONTH);
+                    
+                    System.out.println("  - Contenedor " + contenedor.getId() + 
+                                     " - Año: " + calContenedor.get(Calendar.YEAR) + 
+                                     " vs " + calConsulta.get(Calendar.YEAR) +
+                                     ", Mes: " + calContenedor.get(Calendar.MONTH) + 
+                                     " vs " + calConsulta.get(Calendar.MONTH) +
+                                     ", Día: " + calContenedor.get(Calendar.DAY_OF_MONTH) + 
+                                     " vs " + calConsulta.get(Calendar.DAY_OF_MONTH) +
+                                     " -> " + (coincide ? "MATCH ✓" : "NO MATCH ✗"));
+                    
+                    return coincide;
+                })
+                .toList();
+        
+        System.out.println("Contenedores encontrados: " + resultado.size());
+        System.out.println("=======================================");
+        
+        return resultado;
     }
 
     // Método para asignación local (sin comunicación externa)
@@ -369,28 +453,41 @@ public class ReciclajeService {
         }
     }
 
-    // Consulta del estado de los contenedores de una zona en una determinada fecha
-    @Transactional(readOnly = true)
-    public List<Contenedor> getContenedoresByDateAndPostalCode(Date date, int postalCode) {
-        Date fechaConsulta = date;
-        
-        List<Contenedor> contenedores = contenedorRepository.findAll();
-        
-        // Filtramos y devolvemos
-        return contenedores.stream()
-                .filter(contenedor -> 
-                    contenedor.getCodigoPostal() == postalCode && 
-                    contenedor.getFechaVaciado() != null &&
-                    contenedor.getFechaVaciado().getTime() == fechaConsulta.getTime())
-                .toList();
-    }
-    
-    // Method to add a new Contenedor
-    public void addContenedor(Contenedor contenedor) {
-        if (contenedor != null) {
-            contenedorRepository.save(contenedor);
-        }
-    }
+// // MÉTODO CORREGIDO - Reemplaza el método getContenedoresByDateAndPostalCode en ReciclajeService.java
+//
+// // Consulta del estado de los contenedores de una zona en una determinada fecha
+// @Transactional(readOnly = true)
+// public List<Contenedor> getContenedoresByDateAndPostalCode(Date date, int postalCode) {
+//     List<Contenedor> contenedores = contenedorRepository.findAll();
+//     
+//     // Crear Calendar para comparar solo fechas (sin horas)
+//     Calendar calConsulta = Calendar.getInstance();
+//     calConsulta.setTime(date);
+//     calConsulta.set(Calendar.HOUR_OF_DAY, 0);
+//     calConsulta.set(Calendar.MINUTE, 0);
+//     calConsulta.set(Calendar.SECOND, 0);
+//     calConsulta.set(Calendar.MILLISECOND, 0);
+//     
+//     // Filtramos comparando solo la fecha (sin hora)
+//     return contenedores.stream()
+//             .filter(contenedor -> {
+//                 if (contenedor.getCodigoPostal() != postalCode || contenedor.getFechaVaciado() == null) {
+//                     return false;
+//                 }
+//                 
+//                 // Comparar solo fechas (día/mes/año), ignorando horas
+//                 Calendar calContenedor = Calendar.getInstance();
+//                 calContenedor.setTime(contenedor.getFechaVaciado());
+//                 
+//                 return calContenedor.get(Calendar.YEAR) == calConsulta.get(Calendar.YEAR) &&
+//                        calContenedor.get(Calendar.MONTH) == calConsulta.get(Calendar.MONTH) &&
+//                        calContenedor.get(Calendar.DAY_OF_MONTH) == calConsulta.get(Calendar.DAY_OF_MONTH);
+//             })
+//             .toList();
+// }
+
+ // IMPORTANTE: Añade este import al inicio del archivo ReciclajeService.java:
+ // import java.util.Calendar;
     
     // Method to make contenedor (crear nuevo contenedor)
     public Contenedor makeContenedor(User user, int codigoPostal, float capacidad) {
