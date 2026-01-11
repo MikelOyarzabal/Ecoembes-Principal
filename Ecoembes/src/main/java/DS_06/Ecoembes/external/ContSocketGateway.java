@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import DS_06.Ecoembes.entity.Contenedor;
-import DS_06.Ecoembes.external.IPlantaReciclajeGateway;
 
 @Service
 public class ContSocketGateway implements IPlantaReciclajeGateway {

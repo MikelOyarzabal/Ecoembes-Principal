@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import DS_06.Ecoembes.dto.CredentialsDTO;
-import DS_06.Ecoembes.entity.User;
 import DS_06.Ecoembes.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;

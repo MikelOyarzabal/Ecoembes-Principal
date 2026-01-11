@@ -3,9 +3,6 @@ package DS_06.Ecoembes.external;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import DS_06.Ecoembes.external.ContSocketGateway;
-import DS_06.Ecoembes.external.PlasSBGateway;
-
 @Component
 public class PlantaReciclajeFactory {
     

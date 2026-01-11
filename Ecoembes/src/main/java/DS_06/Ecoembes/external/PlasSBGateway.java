@@ -14,7 +14,6 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 
 import DS_06.Ecoembes.entity.Contenedor;
-import DS_06.Ecoembes.external.IPlantaReciclajeGateway;
 
 @Service
 public class PlasSBGateway implements IPlantaReciclajeGateway {
