@@ -11,14 +11,9 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .badge-VERDE { background-color: #28a745; }
-        .badge-AMARILLO { background-color: #ffc107; color: #212529; }
+        .badge-AMARILLO { background-color: #ffc107; }
         .badge-ROJO { background-color: #dc3545; }
         .badge-LLENO { background-color: #6c757d; }
-        .stat-box {
-            padding: 15px;
-            border-radius: 10px;
-            text-align: center;
-        }
     </style>
 </head>
 <body>
@@ -34,7 +29,7 @@
     </nav>
     
     <div class="container mt-5">
-        <h2 class="mb-4">🗺️ Consultar Estado de Contenedores por Zona</h2>
+        <h2 class="mb-4">🗺️ Consultar Contenedores por Zona</h2>
         
         <!-- Formulario de búsqueda -->
         <div class="card mb-4">
@@ -55,56 +50,10 @@
                                    th:value="${fecha}">
                         </div>
                         <div class="col-md-2 d-flex align-items-end">
-                            <button type="submit" class="btn btn-primary w-100">🔍 Buscar</button>
+                            <button type="submit" class="btn btn-primary w-100">Buscar</button>
                         </div>
                     </div>
                 </form>
-            </div>
-        </div>
-        
-        <!-- Estadísticas de la zona -->
-        <div th:if="${estadisticas}" class="card mb-4">
-            <div class="card-header bg-info text-white">
-                <h5 class="mb-0">📊 Estadísticas de la Zona - CP: <span th:text="${codigoPostal}"></span></h5>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3">
-                        <div class="stat-box bg-light">
-                            <h3 th:text="${contenedores.size()}">0</h3>
-                            <small class="text-muted">Total Contenedores</small>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stat-box bg-light">
-                            <h3 th:text="${totalCapacidadZona + ' kg'}">0 kg</h3>
-                            <small class="text-muted">Capacidad Total</small>
-                        </div>
-                    </div>
-                    <div class="col-md-6">
-                        <div class="stat-box bg-light">
-                            <h6>Distribución por Nivel:</h6>
-                            <div class="d-flex justify-content-around mt-2">
-                                <div>
-                                    <span class="badge badge-VERDE" th:text="${contenedoresVerdes}">0</span>
-                                    <small class="d-block">Verdes</small>
-                                </div>
-                                <div>
-                                    <span class="badge badge-AMARILLO" th:text="${contenedoresAmarillos}">0</span>
-                                    <small class="d-block">Amarillos</small>
-                                </div>
-                                <div>
-                                    <span class="badge badge-ROJO" th:text="${contenedoresRojos}">0</span>
-                                    <small class="d-block">Rojos</small>
-                                </div>
-                                <div>
-                                    <span class="badge badge-LLENO" th:text="${contenedoresLlenos}">0</span>
-                                    <small class="d-block">Llenos</small>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
         </div>
         
@@ -143,7 +92,7 @@
                                       th:text="${contenedor.nivelDeLlenado}">
                                 </span>
                             </td>
-                            <td th:text="${contenedor.fechaVaciado != null ? #dates.format(contenedor.fechaVaciado, 'dd/MM/yyyy HH:mm') : '-'}"></td>
+                            <td th:text="${#dates.format(contenedor.fechaVaciado, 'dd/MM/yyyy HH:mm')}"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -151,7 +100,7 @@
         </div>
         
         <div class="mt-3">
-            <a href="/contenedores" class="btn btn-secondary">← Volver a Contenedores</a>
+            <a href="/contenedores" class="btn btn-secondary">Volver a Contenedores</a>
         </div>
     </div>
     

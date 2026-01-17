@@ -9,7 +9,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -116,76 +115,19 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
         }
     }
     
-    @Override
-    public Contenedor actualizarContenedor(String token, long contenedorId, int codigoPostal, 
-                                           float capacidad, String nivelLlenado) {
-        try {
-            // Nota: Este endpoint necesitaría existir en el servidor
-            // Por ahora, simulamos la actualización obteniendo y devolviendo el contenedor
-            String url = serverUrl + "/reciclaje/contenedores/" + contenedorId + 
-                        "?token=" + token + 
-                        "&codigoPostal=" + codigoPostal + 
-                        "&capacidad=" + capacidad +
-                        "&nivelLlenado=" + nivelLlenado;
-            
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.APPLICATION_JSON);
-            
-            HttpEntity<Void> request = new HttpEntity<>(headers);
-            
-            ResponseEntity<Contenedor> response = restTemplate.exchange(
-                url, HttpMethod.PUT, request, Contenedor.class);
-            
-            if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return response.getBody();
-            }
-            
-            // Si el servidor no tiene el endpoint PUT, simular la respuesta
-            Contenedor actualizado = new Contenedor();
-            actualizado.setId(contenedorId);
-            actualizado.setCodigoPostal(codigoPostal);
-            actualizado.setCapacidad(capacidad);
-            actualizado.setNivelDeLlenado(nivelLlenado);
-            return actualizado;
-            
-        } catch (RestClientException e) {
-            System.err.println("Error actualizando contenedor: " + e.getMessage());
-            // En caso de que el endpoint no exista, devolver el contenedor con los datos nuevos
-            Contenedor actualizado = new Contenedor();
-            actualizado.setId(contenedorId);
-            actualizado.setCodigoPostal(codigoPostal);
-            actualizado.setCapacidad(capacidad);
-            actualizado.setNivelDeLlenado(nivelLlenado);
-            System.out.println("Nota: Actualización simulada localmente. " +
-                             "Para actualización real, usar Swagger/Postman en el servidor.");
-            return actualizado;
-        }
-    }
-    
-    @Override
-    public Contenedor getContenedorById(String token, long contenedorId) {
-        try {
-            // Obtener todos y filtrar por ID
-            List<Contenedor> todos = getAllContenedores(token);
-            return todos.stream()
-                       .filter(c -> c.getId() == contenedorId)
-                       .findFirst()
-                       .orElse(null);
-        } catch (Exception e) {
-            System.err.println("Error obteniendo contenedor: " + e.getMessage());
-            return null;
-        }
-    }
-    
+ // MÉTODO CON DEBUG - Reemplaza getContenedoresPorZona en EcoembesServiceProxy.java
+
     @Override
     public List<Contenedor> getContenedoresPorZona(String token, Date fecha, int codigoPostal) {
         try {
+            // Intentar con formato más simple
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd");
             String fechaStr = sdf.format(fecha);
             
             String url = serverUrl + "/reciclaje/contenedores/zona?token=" + token + 
                         "&date=" + fechaStr + "&codigoPostal=" + codigoPostal;
             
+            // DEBUG: Ver qué URL se está llamando
             System.out.println("===== DEBUG CLIENTE =====");
             System.out.println("URL completa: " + url);
             System.out.println("Fecha original: " + fecha);
@@ -200,7 +142,7 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
             return List.of();
         } catch (RestClientException e) {
             System.err.println("Error obteniendo contenedores por zona: " + e.getMessage());
-            e.printStackTrace();
+            e.printStackTrace(); // ← Ver el stack trace completo
             return List.of();
         }
     }
@@ -219,20 +161,6 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
         } catch (RestClientException e) {
             System.err.println("Error obteniendo plantas: " + e.getMessage());
             return List.of();
-        }
-    }
-    
-    @Override
-    public PlantaReciclaje getPlantaById(String token, long plantaId) {
-        try {
-            List<PlantaReciclaje> todas = getAllPlantas(token);
-            return todas.stream()
-                       .filter(p -> p.getId() == plantaId)
-                       .findFirst()
-                       .orElse(null);
-        } catch (Exception e) {
-            System.err.println("Error obteniendo planta: " + e.getMessage());
-            return null;
         }
     }
     

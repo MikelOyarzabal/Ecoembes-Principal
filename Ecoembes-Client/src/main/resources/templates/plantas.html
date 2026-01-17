@@ -13,15 +13,6 @@
         .progress {
             height: 25px;
         }
-        .card-saturada {
-            border: 2px solid #dc3545;
-            animation: pulse-border 2s infinite;
-        }
-        @keyframes pulse-border {
-            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
-            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
-        }
     </style>
 </head>
 <body>
@@ -39,18 +30,14 @@
     <div class="container mt-5">
         <div class="d-flex justify-content-between align-items-center mb-4">
             <h2>🏭 Plantas de Reciclaje</h2>
-            <a href="/plantas/capacidad" class="btn btn-info">📊 Consultar Capacidad</a>
+            <a href="/plantas/capacidad" class="btn btn-info">Consultar Capacidad</a>
         </div>
         
         <div class="row">
             <div class="col-md-4 mb-4" th:each="planta : ${plantas}">
-                <div class="card h-100" th:classappend="${planta.porcentajeOcupacion >= umbralSaturacion ? 'card-saturada' : ''}">
+                <div class="card h-100">
                     <div class="card-body">
-                        <div class="d-flex justify-content-between align-items-start">
-                            <h5 class="card-title" th:text="${planta.nombre}"></h5>
-                            <span th:if="${planta.porcentajeOcupacion >= 90}" class="badge bg-danger">⚠️ CRÍTICO</span>
-                            <span th:if="${planta.porcentajeOcupacion >= umbralSaturacion and planta.porcentajeOcupacion < 90}" class="badge bg-warning">⚠️</span>
-                        </div>
+                        <h5 class="card-title" th:text="${planta.nombre}"></h5>
                         <p class="text-muted">ID: <span th:text="${planta.id}"></span></p>
                         
                         <div class="mb-3">
@@ -69,7 +56,7 @@
                                 <div class="progress-bar" 
                                      role="progressbar" 
                                      th:style="'width: ' + ${planta.porcentajeOcupacion} + '%'"
-                                     th:classappend="${planta.porcentajeOcupacion >= 90 ? 'bg-danger' : (planta.porcentajeOcupacion >= 75 ? 'bg-warning' : (planta.porcentajeOcupacion >= 50 ? 'bg-info' : 'bg-success'))}"
+                                     th:classappend="${planta.porcentajeOcupacion > 75 ? 'bg-danger' : (planta.porcentajeOcupacion > 50 ? 'bg-warning' : 'bg-success')}"
                                      th:text="${planta.porcentajeOcupacion} + '%'">
                                 </div>
                             </div>
@@ -77,7 +64,7 @@
                         
                         <div>
                             <strong>Contenedores:</strong>
-                            <p th:text="${planta.listaContenedor != null ? planta.listaContenedor.size() : 0}"></p>
+                            <p th:text="${planta.listaContenedor.size()}"></p>
                         </div>
                     </div>
                 </div>
@@ -89,7 +76,7 @@
         </div>
         
         <div class="mt-3">
-            <a href="/dashboard" class="btn btn-secondary">← Volver al Dashboard</a>
+            <a href="/dashboard" class="btn btn-secondary">Volver al Dashboard</a>
         </div>
     </div>
     

@@ -11,7 +11,7 @@
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         }
         .badge-VERDE { background-color: #28a745; }
-        .badge-AMARILLO { background-color: #ffc107; color: #212529; }
+        .badge-AMARILLO { background-color: #ffc107; }
         .badge-ROJO { background-color: #dc3545; }
         .badge-LLENO { background-color: #6c757d; }
         .table-selectable tr:hover {
@@ -38,19 +38,12 @@
     <div class="container mt-5">
         <h2 class="mb-4">🔗 Asignación de Contenedores a Plantas</h2>
         
-        <div th:if="${success}" class="alert alert-success alert-dismissible fade show" role="alert">
+        <div th:if="${success}" class="alert alert-success" role="alert">
             <span th:text="${success}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
         </div>
         
-        <div th:if="${error}" class="alert alert-danger alert-dismissible fade show" role="alert">
+        <div th:if="${error}" class="alert alert-danger" role="alert">
             <span th:text="${error}"></span>
-            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-        </div>
-        
-        <div th:if="${alertaSaturacion}" class="alert alert-warning" role="alert">
-            <strong>⚠️ Atención:</strong> La planta seleccionada está alcanzando su capacidad máxima. 
-            Se ha enviado una alerta de saturación.
         </div>
         
         <form method="post" th:action="@{/asignaciones/asignar}" id="formAsignacion">
@@ -62,9 +55,9 @@
                             <h5>Seleccione Contenedores</h5>
                             <small class="text-muted">Haga clic en las filas para seleccionar múltiples contenedores</small>
                         </div>
-                        <div class="card-body" style="max-height: 500px; overflow-y: auto;">
+                        <div class="card-body">
                             <table class="table table-sm table-selectable">
-                                <thead class="sticky-top bg-white">
+                                <thead>
                                     <tr>
                                         <th>✓</th>
                                         <th>ID</th>
@@ -84,8 +77,7 @@
                                             <input type="checkbox" 
                                                    th:name="contenedorIds" 
                                                    th:value="${contenedor.id}"
-                                                   class="form-check-input"
-                                                   onclick="event.stopPropagation()">
+                                                   class="form-check-input">
                                         </td>
                                         <td th:text="${contenedor.id}"></td>
                                         <td th:text="${contenedor.codigoPostal}"></td>
@@ -99,9 +91,6 @@
                                     </tr>
                                 </tbody>
                             </table>
-                        </div>
-                        <div class="card-footer">
-                            <small>Contenedores seleccionados: <span id="contadorSeleccionados">0</span></small>
                         </div>
                     </div>
                 </div>
@@ -118,26 +107,11 @@
                                 <select class="form-select form-select-lg" id="plantaId" name="plantaId" required>
                                     <option value="">-- Seleccione --</option>
                                     <option th:each="planta : ${plantas}" 
-                                            th:value="${planta.id}"
-                                            th:data-capacidad="${planta.capacidadDisponible}">
+                                            th:value="${planta.id}">
                                         <span th:text="${planta.nombre}"></span>
                                         (Disponible: <span th:text="${planta.capacidadDisponible}"></span> kg)
                                     </option>
                                 </select>
-                            </div>
-                            
-                            <!-- Opción de notificación -->
-                            <div class="mb-3">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="enviarNotificacion" 
-                                           name="enviarNotificacion" value="true" checked>
-                                    <label class="form-check-label" for="enviarNotificacion">
-                                        📧 Enviar notificación por email
-                                    </label>
-                                    <small class="form-text text-muted d-block">
-                                        Recibirá un resumen con el total de contenedores y envases estimados
-                                    </small>
-                                </div>
                             </div>
                             
                             <div class="alert alert-info">
@@ -151,7 +125,7 @@
                             
                             <div class="d-grid gap-2">
                                 <button type="submit" class="btn btn-primary btn-lg">
-                                    📤 Asignar Contenedores
+                                    Asignar Contenedores
                                 </button>
                                 <a href="/dashboard" class="btn btn-secondary">
                                     Cancelar
@@ -167,9 +141,7 @@
                         </div>
                         <div class="card-body">
                             <div th:each="planta : ${plantas}" class="mb-2">
-                                <strong th:text="${planta.nombre}"></strong>
-                                <span th:if="${planta.porcentajeOcupacion >= 75}" class="badge bg-warning">⚠️</span>
-                                <br>
+                                <strong th:text="${planta.nombre}"></strong><br>
                                 <small class="text-muted">
                                     ID: <span th:text="${planta.id}"></span> | 
                                     Disponible: <span th:text="${planta.capacidadDisponible} + ' kg'"></span>
@@ -199,27 +171,7 @@
             } else {
                 row.classList.remove('selected-row');
             }
-            
-            actualizarContador();
         }
-        
-        function actualizarContador() {
-            const checkboxes = document.querySelectorAll('input[name="contenedorIds"]:checked');
-            document.getElementById('contadorSeleccionados').textContent = checkboxes.length;
-        }
-        
-        // Actualizar contador cuando se hace clic directamente en el checkbox
-        document.querySelectorAll('input[name="contenedorIds"]').forEach(function(checkbox) {
-            checkbox.addEventListener('change', function() {
-                const row = this.closest('tr');
-                if (this.checked) {
-                    row.classList.add('selected-row');
-                } else {
-                    row.classList.remove('selected-row');
-                }
-                actualizarContador();
-            });
-        });
     </script>
 </body>
 </html>
