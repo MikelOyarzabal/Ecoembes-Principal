@@ -56,6 +56,15 @@
             </div>
         </div>
         
+        <!-- Alerta de saturación -->
+        <div th:if="${alertaSaturacion}" class="alert alert-danger" role="alert">
+            <h4 class="alert-heading">⚠️ Alerta de Saturación</h4>
+            <p>La planta <strong th:text="${plantaSeleccionada.nombre}"></strong> está al 
+               <strong th:text="${porcentajeOcupacion}"></strong>% de su capacidad.</p>
+            <hr>
+            <p class="mb-0">Se recomienda redistribuir contenedores o aumentar la capacidad de procesamiento.</p>
+        </div>
+        
         <!-- Resultado -->
         <div th:if="${capacidad != null}" class="card">
             <div class="card-body">
@@ -81,7 +90,8 @@
                 
                 <div th:if="${plantaSeleccionada != null}" class="mt-3">
                     <p><strong>Capacidad Total:</strong> <span th:text="${plantaSeleccionada.capacidad} + ' kg'"></span></p>
-                    <p><strong>Contenedores Actuales:</strong> <span th:text="${plantaSeleccionada.listaContenedor.size()}"></span></p>
+                    <p><strong>Porcentaje de Ocupación:</strong> <span th:text="${plantaSeleccionada.porcentajeOcupacion} + '%'"></span></p>
+                    <p><strong>Contenedores Actuales:</strong> <span th:text="${plantaSeleccionada.listaContenedor != null ? plantaSeleccionada.listaContenedor.size() : 0}"></span></p>
                 </div>
             </div>
         </div>
@@ -91,7 +101,7 @@
         </div>
         
         <div class="mt-3">
-            <a href="/plantas" class="btn btn-secondary">Volver a Plantas</a>
+            <a href="/plantas" class="btn btn-secondary">← Volver a Plantas</a>
         </div>
     </div>
     

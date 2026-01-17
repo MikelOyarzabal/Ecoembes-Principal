@@ -40,6 +40,14 @@
             color: #667eea;
             margin-bottom: 20px;
         }
+        .alert-saturacion {
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0.4); }
+            70% { box-shadow: 0 0 0 10px rgba(220, 53, 69, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(220, 53, 69, 0); }
+        }
     </style>
 </head>
 <body>
@@ -54,7 +62,22 @@
         </div>
     </nav>
     
-    <div class="container mt-5">
+    <div class="container mt-4">
+        <!-- Alerta de Saturación -->
+        <div th:if="${hayAlertaSaturacion}" class="alert alert-danger alert-saturacion" role="alert">
+            <h4 class="alert-heading">⚠️ Alerta de Saturación</h4>
+            <p>Las siguientes plantas están alcanzando su capacidad máxima:</p>
+            <ul>
+                <li th:each="planta : ${plantasSaturadas}">
+                    <strong th:text="${planta.nombre}"></strong> - 
+                    <span th:text="${planta.porcentajeOcupacion}"></span>% ocupación
+                    (Disponible: <span th:text="${planta.capacidadDisponible}"></span> kg)
+                </li>
+            </ul>
+            <hr>
+            <p class="mb-0">Se recomienda redistribuir contenedores o aumentar la capacidad de procesamiento.</p>
+        </div>
+        
         <!-- Estadísticas -->
         <div class="row mb-4">
             <div class="col-md-6">
@@ -77,9 +100,9 @@
             <div class="col-md-4 mb-4">
                 <a href="/contenedores" class="text-decoration-none">
                     <div class="card menu-card">
-                        <div>📦</div>
+                        <div style="font-size: 3rem;">📦</div>
                         <h5>Gestión de Contenedores</h5>
-                        <p class="text-muted">Ver, crear y consultar contenedores</p>
+                        <p class="text-muted">Ver, crear y editar contenedores</p>
                     </div>
                 </a>
             </div>
@@ -87,7 +110,7 @@
             <div class="col-md-4 mb-4">
                 <a href="/plantas" class="text-decoration-none">
                     <div class="card menu-card">
-                        <div>🏭</div>
+                        <div style="font-size: 3rem;">🏭</div>
                         <h5>Plantas de Reciclaje</h5>
                         <p class="text-muted">Ver plantas y consultar capacidad</p>
                     </div>
@@ -97,10 +120,35 @@
             <div class="col-md-4 mb-4">
                 <a href="/asignaciones" class="text-decoration-none">
                     <div class="card menu-card">
-                        <div>🔗</div>
+                        <div style="font-size: 3rem;">🔗</div>
                         <h5>Asignaciones</h5>
                         <p class="text-muted">Asignar contenedores a plantas</p>
                     </div>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Acciones Rápidas -->
+        <h3 class="mb-4">Acciones Rápidas</h3>
+        <div class="row">
+            <div class="col-md-3 mb-3">
+                <a href="/contenedores/nuevo" class="btn btn-success w-100 py-3">
+                    ➕ Nuevo Contenedor
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/contenedores/zona" class="btn btn-info w-100 py-3">
+                    🗺️ Consultar Zona
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/plantas/capacidad" class="btn btn-warning w-100 py-3">
+                    📊 Consultar Capacidad
+                </a>
+            </div>
+            <div class="col-md-3 mb-3">
+                <a href="/asignaciones" class="btn btn-primary w-100 py-3">
+                    📤 Nueva Asignación
                 </a>
             </div>
         </div>

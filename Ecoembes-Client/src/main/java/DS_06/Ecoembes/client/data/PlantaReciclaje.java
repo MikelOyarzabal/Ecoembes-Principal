@@ -68,4 +68,11 @@ public class PlantaReciclaje {
         int ocupado = capacidad - capacidadDisponible;
         return (ocupado * 100) / capacidad;
     }
+    
+    /**
+     * Verifica si la planta está saturada (>= umbral%)
+     */
+    public boolean estaSaturada(int umbral) {
+        return getPorcentajeOcupacion() >= umbral;
+    }
 }

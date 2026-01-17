@@ -15,10 +15,14 @@ public interface IEcoembesServiceProxy {
     // Contenedores
     List<Contenedor> getAllContenedores(String token);
     Contenedor crearContenedor(String token, int codigoPostal, float capacidad);
+    Contenedor actualizarContenedor(String token, long contenedorId, int codigoPostal, 
+                                    float capacidad, String nivelLlenado);
+    Contenedor getContenedorById(String token, long contenedorId);
     List<Contenedor> getContenedoresPorZona(String token, Date fecha, int codigoPostal);
     
     // Plantas de Reciclaje
     List<PlantaReciclaje> getAllPlantas(String token);
+    PlantaReciclaje getPlantaById(String token, long plantaId);
     Integer getCapacidadPlanta(String token, long plantaId, Date fecha);
     
     // Asignaciones

@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Contenedor - Ecoembes</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .navbar {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .badge-VERDE { background-color: #28a745; }
+        .badge-AMARILLO { background-color: #ffc107; color: #212529; }
+        .badge-ROJO { background-color: #dc3545; }
+        .badge-LLENO { background-color: #6c757d; }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-dark">
+        <div class="container-fluid">
+            <a href="/dashboard" class="navbar-brand">♻️ Ecoembes</a>
+            <div class="d-flex align-items-center">
+                <span class="text-white me-3" th:text="${email}"></span>
+                <a href="/logout" class="btn btn-outline-light btn-sm">Cerrar Sesión</a>
+            </div>
+        </div>
+    </nav>
+    
+    <div class="container mt-5">
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h4 class="mb-0">✏️ Editar Contenedor #<span th:text="${contenedor.id}"></span></h4>
+                    </div>
+                    <div class="card-body">
+                        
+                        <form method="post" th:action="@{/contenedores/actualizar}">
+                            <input type="hidden" name="id" th:value="${contenedor.id}">
+                            
+                            <div class="mb-3">
+                                <label for="codigoPostal" class="form-label">Código Postal</label>
+                                <input type="number" class="form-control" id="codigoPostal" 
+                                       name="codigoPostal" required min="1000" max="99999"
+                                       th:value="${contenedor.codigoPostal}">
+                            </div>
+                            
+                            <div class="mb-3">
+                                <label for="capacidad" class="form-label">Capacidad (kg)</label>
+                                <input type="number" class="form-control" id="capacidad" 
+                                       name="capacidad" required step="0.01" min="1"
+                                       th:value="${contenedor.capacidad}">
+                            </div>
+                            
+                            <div class="mb-4">
+                                <label for="nivelLlenado" class="form-label">Nivel de Llenado</label>
+                                <select class="form-select" id="nivelLlenado" name="nivelLlenado" required>
+                                    <option th:each="nivel : ${nivelesLlenado}" 
+                                            th:value="${nivel}"
+                                            th:text="${nivel}"
+                                            th:selected="${nivel == contenedor.nivelDeLlenado}">
+                                    </option>
+                                </select>
+                                <div class="mt-2">
+                                    <small class="text-muted">Niveles de referencia:</small>
+                                    <div class="d-flex gap-2 mt-1">
+                                        <span class="badge badge-VERDE">VERDE (25%)</span>
+                                        <span class="badge badge-AMARILLO">AMARILLO (50%)</span>
+                                        <span class="badge badge-ROJO">ROJO (75%)</span>
+                                        <span class="badge badge-LLENO">LLENO (100%)</span>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="alert alert-info" role="alert">
+                                <strong>ℹ️ Nota:</strong> Para cambios persistentes en el servidor, 
+                                use la interfaz Swagger UI en 
+                                <a href="http://localhost:8080/swagger-ui.html" target="_blank">http://localhost:8080/swagger-ui.html</a>
+                                o utilice Postman con el endpoint PUT correspondiente.
+                            </div>
+                            
+                            <div class="d-grid gap-2">
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    💾 Guardar Cambios
+                                </button>
+                                <a href="/contenedores" class="btn btn-secondary">Cancelar</a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
