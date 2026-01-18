@@ -54,14 +54,21 @@ public class ReciclajeController {
 			)
 	@GetMapping("/contenedores")
 	public ResponseEntity<List<ContenedorDTO>> getAllContenedores(
-			@Parameter(name = "token", description = "Token de autenticación", required = true)
-			@RequestParam(value = "token") String token) {
+	        @Parameter(name = "token", description = "Token de autenticación", required = true)
+	        @RequestParam(value = "token") String token) {
 
-		// VALIDAR TOKEN usando getUserByToken (ya existe en tu código)
-		User user = authService.getUserByToken(token);
-		if (user == null) {
-			return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-		}
+	    System.out.println("===== SERVIDOR - getAllContenedores =====");
+	    System.out.println("Token recibido: [" + token + "]");
+	    
+	    // VALIDAR TOKEN usando getUserByToken
+	    User user = authService.getUserByToken(token);
+	    
+	    System.out.println("Usuario encontrado: " + (user != null ? user.getEmail() : "NULL - TOKEN INVÁLIDO"));
+	    System.out.println("==========================================");
+	    
+	    if (user == null) {
+	        return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+	    }
 
 		try {
 			List<Contenedor> contenedores = reciclajeService.getContenedores();

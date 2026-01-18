@@ -76,6 +76,34 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
         }
     }
     
+    
+    @Override
+    public boolean logout(String token) {
+        try {
+            String url = serverUrl + "/auth/logout";
+            
+            System.out.println("===== CLIENTE - logout =====");
+            System.out.println("Token a enviar: [" + token + "]");
+            
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_JSON);
+            
+            // Enviar el token con comillas para que sea JSON válido
+            String body = "\"" + token + "\"";
+            System.out.println("Body enviado: [" + body + "]");
+            System.out.println("============================");
+            
+            HttpEntity<String> request = new HttpEntity<>(body, headers);
+            
+            ResponseEntity<Void> response = restTemplate.postForEntity(url, request, Void.class);
+            
+            return response.getStatusCode().is2xxSuccessful();
+        } catch (RestClientException e) {
+            System.err.println("Error en logout: " + e.getMessage());
+            return false;
+        }
+    }
+    
     @Override
     public String login(String email, String password) {
         try {
@@ -91,7 +119,16 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
             ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
             
             if (response.getStatusCode().is2xxSuccessful()) {
-                return response.getBody();
+                String token = response.getBody();
+                // Limpiar posibles comillas del token
+                if (token != null) {
+                    token = token.trim();
+                    if (token.startsWith("\"") && token.endsWith("\"")) {
+                        token = token.substring(1, token.length() - 1);
+                    }
+                }
+                System.out.println("Token limpio: [" + token + "]");
+                return token;
             }
             return null;
         } catch (RestClientException e) {
@@ -99,29 +136,14 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
             return null;
         }
     }
-    
-    @Override
-    public boolean logout(String token) {
-        try {
-            String url = serverUrl + "/auth/logout";
-            
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentType(MediaType.TEXT_PLAIN);
-            
-            HttpEntity<String> request = new HttpEntity<>(token, headers);
-            
-            ResponseEntity<Void> response = restTemplate.postForEntity(url, request, Void.class);
-            
-            return response.getStatusCode().is2xxSuccessful();
-        } catch (RestClientException e) {
-            System.err.println("Error en logout: " + e.getMessage());
-            return false;
-        }
-    }
-    
+
     @Override
     public List<Contenedor> getAllContenedores(String token) {
         try {
+            System.out.println("===== USANDO TOKEN =====");
+            System.out.println("Token: [" + token + "]");
+            System.out.println("========================");
+            
             String url = serverUrl + "/reciclaje/contenedores?token=" + token;
             
             ResponseEntity<ContenedorDTO[]> response = restTemplate.getForEntity(url, ContenedorDTO[].class);

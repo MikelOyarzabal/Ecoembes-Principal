@@ -59,42 +59,29 @@ public class AuthController {
     )    
     @PostMapping("/logout")    
     public ResponseEntity<Void> logout(
-    		@io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Authorization token in plain text", required = true)
-    		@RequestBody String token) {    	
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Authorization token in plain text", required = true)
+            @RequestBody String token) {
+        
+        // Limpiar comillas del token si vienen incluidas
+        if (token != null) {
+            token = token.trim();
+            if (token.startsWith("\"") && token.endsWith("\"")) {
+                token = token.substring(1, token.length() - 1);
+            }
+        }
+        
+        System.out.println("===== SERVIDOR - logout =====");
+        System.out.println("Token limpio: [" + token + "]");
+        System.out.println("=============================");
+        
         Optional<Boolean> result = authService.logout(token);
-    	
+
         if (result.isPresent() && result.get()) {
-        	return new ResponseEntity<>(HttpStatus.NO_CONTENT);	
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);	
         } else {
-        	return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }        
     }
-    
-//    @Operation(
-//    	    summary = "Sign up to the system",
-//    	    description = "Allows a new user to register by providing nickname, email and password. " +
-//    	                  "Validates uniqueness of email and nickname.",
-//    	    responses = {
-//    	        @ApiResponse(responseCode = "204", description = "No Content: User created successfully"),
-//    	        @ApiResponse(responseCode = "409", description = "Conflict: User already exists (email or nickname)"),
-//    	    }
-//    	)
-//    	@PostMapping("/signup")
-//    	public ResponseEntity<Void> signup(
-//    	    @io.swagger.v3.oas.annotations.parameters.RequestBody(
-//    	        description = "User registration data (nickname, email, password)", 
-//    	        required = true
-//    	    )
-//    	    @RequestBody User userData) {
-//    	    
-//    	    try {
-//    	        authService.signup(userData);
-//    	        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
-//    	    } catch (RuntimeException e) {
-//    	        // Usuario ya existe (por email o nickname)
-//    	        return new ResponseEntity<>(HttpStatus.CONFLICT);
-//    	    }
-//    	}
     
     
     @Operation(
