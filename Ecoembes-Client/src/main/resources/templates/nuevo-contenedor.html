@@ -48,11 +48,38 @@
                                 <small class="form-text text-muted">Capacidad del contenedor en kilogramos</small>
                             </div>
                             
+                            <div class="mb-4">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="enviarEmail" 
+                                           name="enviarEmail" value="true">
+                                    <label class="form-check-label" for="enviarEmail">
+                                        📧 Enviar notificación por email
+                                    </label>
+                                    <small class="form-text text-muted d-block">
+                                        Se enviará una confirmación a su correo electrónico
+                                    </small>
+                                </div>
+                            </div>
+                            
                             <div class="d-grid gap-2">
-                                <button type="submit" class="btn btn-primary">Crear Contenedor</button>
+                                <button type="submit" class="btn btn-primary btn-lg">
+                                    ✅ Crear Contenedor
+                                </button>
                                 <a href="/contenedores" class="btn btn-secondary">Cancelar</a>
                             </div>
                         </form>
+                    </div>
+                </div>
+                
+                <!-- Info adicional -->
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h6>ℹ️ Información</h6>
+                        <ul class="mb-0 small text-muted">
+                            <li>El contenedor se creará con nivel de llenado <span class="badge bg-success">VERDE</span> (25%)</li>
+                            <li>La fecha de vaciado se establecerá automáticamente</li>
+                            <li>Puede editar el contenedor después de crearlo</li>
+                        </ul>
                     </div>
                 </div>
             </div>
