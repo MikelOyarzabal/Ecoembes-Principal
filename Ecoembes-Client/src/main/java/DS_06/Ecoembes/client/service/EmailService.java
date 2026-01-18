@@ -95,7 +95,6 @@ public class EmailService {
     public boolean enviarNotificacionAsignacion(String destinatario, String nombrePlanta, 
             int totalContenedores, float capacidadTotalAsignada, int capacidadRestantePlanta) {
         
-        // Estimación de envases (aproximado: 1 kg = 50 envases de plástico)
         int envasesEstimados = (int) (capacidadTotalAsignada * 50);
         
         if (!emailEnabled || mailSender == null) {
@@ -195,7 +194,7 @@ public class EmailService {
             helper.setFrom(fromEmail);
             helper.setTo(destinatario);
             helper.setSubject("⚠️ ALERTA: Planta " + nombrePlanta + " al " + porcentajeOcupacion + "% de capacidad");
-            helper.setPriority(1); // Alta prioridad
+            helper.setPriority(1);
             
             String colorAlerta = porcentajeOcupacion >= 90 ? "#dc3545" : "#ffc107";
             String nivelAlerta = porcentajeOcupacion >= 90 ? "CRÍTICO" : "ADVERTENCIA";

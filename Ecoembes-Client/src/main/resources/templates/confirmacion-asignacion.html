@@ -53,10 +53,10 @@
         </div>
         
         <!-- Alerta de saturación si aplica -->
-        <div th:if="${resumen.alertaSaturacion}" class="alert alert-warning alert-dismissible fade show" role="alert">
-            <h4 class="alert-heading">⚠️ Alerta de Saturación - <span th:text="${resumen.nivelAlerta}"></span></h4>
-            <p>La planta <strong th:text="${resumen.planta.nombre}"></strong> está al 
-               <strong th:text="${resumen.porcentajeOcupacionPlanta}"></strong>% de su capacidad.</p>
+        <div th:if="${alertaSaturacion}" class="alert alert-warning alert-dismissible fade show" role="alert">
+            <h4 class="alert-heading">⚠️ Alerta de Saturación - <span th:text="${nivelAlerta}"></span></h4>
+            <p>La planta <strong th:text="${planta.nombre}"></strong> está al 
+               <strong th:text="${porcentajeOcupacionPlanta}"></strong>% de su capacidad.</p>
             <hr>
             <p class="mb-0">Se ha enviado una notificación de alerta. Se recomienda tomar acciones preventivas.</p>
             <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
@@ -71,25 +71,25 @@
                 <div class="row g-4">
                     <div class="col-md-3">
                         <div class="stat-box">
-                            <div class="stat-number" th:text="${resumen.totalContenedores}">0</div>
+                            <div class="stat-number" th:text="${totalContenedores}">0</div>
                             <div class="text-muted">Contenedores</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stat-box">
-                            <div class="stat-number" th:text="${#numbers.formatDecimal(resumen.capacidadTotalAsignada, 1, 2)} + ' kg'">0 kg</div>
+                            <div class="stat-number" th:text="${#numbers.formatDecimal(capacidadTotalAsignada, 1, 2)} + ' kg'">0 kg</div>
                             <div class="text-muted">Capacidad Asignada</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stat-box" style="background: #e7f3ff;">
-                            <div class="stat-number text-success" th:text="'~' + ${#numbers.formatInteger(resumen.envasesEstimados, 3, 'COMMA')}">0</div>
+                            <div class="stat-number text-success" th:text="'~' + ${#numbers.formatInteger(envasesEstimados, 3, 'COMMA')}">0</div>
                             <div class="text-muted">📦 Envases Estimados</div>
                         </div>
                     </div>
                     <div class="col-md-3">
                         <div class="stat-box">
-                            <div class="stat-number" th:text="${resumen.capacidadRestantePlanta} + ' kg'">0 kg</div>
+                            <div class="stat-number" th:text="${capacidadRestantePlanta} + ' kg'">0 kg</div>
                             <div class="text-muted">Capacidad Restante</div>
                         </div>
                     </div>
@@ -105,24 +105,24 @@
             <div class="card-body">
                 <div class="row">
                     <div class="col-md-6">
-                        <p><strong>Nombre:</strong> <span th:text="${resumen.planta.nombre}"></span></p>
-                        <p><strong>ID:</strong> <span th:text="${resumen.planta.id}"></span></p>
+                        <p><strong>Nombre:</strong> <span th:text="${planta.nombre}"></span></p>
+                        <p><strong>ID:</strong> <span th:text="${planta.id}"></span></p>
                     </div>
                     <div class="col-md-6">
-                        <p><strong>Capacidad Total:</strong> <span th:text="${resumen.planta.capacidad} + ' kg'"></span></p>
+                        <p><strong>Capacidad Total:</strong> <span th:text="${planta.capacidad} + ' kg'"></span></p>
                         <p><strong>Ocupación Actual:</strong> 
-                            <span th:text="${resumen.porcentajeOcupacionPlanta} + '%'"></span>
-                            <span th:if="${resumen.porcentajeOcupacionPlanta >= 90}" class="badge bg-danger">CRÍTICO</span>
-                            <span th:if="${resumen.porcentajeOcupacionPlanta >= 75 and resumen.porcentajeOcupacionPlanta < 90}" class="badge bg-warning">ALTO</span>
+                            <span th:text="${porcentajeOcupacionPlanta} + '%'"></span>
+                            <span th:if="${porcentajeOcupacionPlanta >= 90}" class="badge bg-danger">CRÍTICO</span>
+                            <span th:if="${porcentajeOcupacionPlanta >= 75 and porcentajeOcupacionPlanta < 90}" class="badge bg-warning">ALTO</span>
                         </p>
                     </div>
                 </div>
                 <div class="progress" style="height: 30px;">
                     <div class="progress-bar" 
                          role="progressbar" 
-                         th:style="'width: ' + ${resumen.porcentajeOcupacionPlanta} + '%'"
-                         th:classappend="${resumen.porcentajeOcupacionPlanta >= 90 ? 'bg-danger' : (resumen.porcentajeOcupacionPlanta >= 75 ? 'bg-warning' : (resumen.porcentajeOcupacionPlanta >= 50 ? 'bg-info' : 'bg-success'))}"
-                         th:text="${resumen.porcentajeOcupacionPlanta} + '% ocupado'">
+                         th:style="'width: ' + ${porcentajeOcupacionPlanta} + '%'"
+                         th:classappend="${porcentajeOcupacionPlanta >= 90 ? 'bg-danger' : (porcentajeOcupacionPlanta >= 75 ? 'bg-warning' : (porcentajeOcupacionPlanta >= 50 ? 'bg-info' : 'bg-success'))}"
+                         th:text="${porcentajeOcupacionPlanta} + '% ocupado'">
                     </div>
                 </div>
             </div>
@@ -145,7 +145,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        <tr th:each="contenedor : ${resumen.contenedoresAsignados}">
+                        <tr th:each="contenedor : ${contenedoresAsignados}">
                             <td th:text="${contenedor.id}"></td>
                             <td th:text="${contenedor.codigoPostal}"></td>
                             <td th:text="${contenedor.capacidad} + ' kg'"></td>
@@ -161,7 +161,7 @@
                     <tfoot class="table-light">
                         <tr>
                             <td colspan="4" class="text-end"><strong>Total:</strong></td>
-                            <td><strong th:text="${#numbers.formatDecimal(resumen.capacidadTotalAsignada, 1, 2)} + ' kg'"></strong></td>
+                            <td><strong th:text="${#numbers.formatDecimal(capacidadTotalAsignada, 1, 2)} + ' kg'"></strong></td>
                         </tr>
                     </tfoot>
                 </table>
@@ -173,9 +173,9 @@
             <h5 class="alert-heading">📧 Notificación Enviada</h5>
             <p>Se ha enviado un correo electrónico con el resumen de esta asignación incluyendo:</p>
             <ul>
-                <li>Total de contenedores: <strong th:text="${resumen.totalContenedores}"></strong></li>
-                <li>Capacidad total asignada: <strong th:text="${#numbers.formatDecimal(resumen.capacidadTotalAsignada, 1, 2)} + ' kg'"></strong></li>
-                <li>Envases estimados: <strong th:text="'~' + ${#numbers.formatInteger(resumen.envasesEstimados, 3, 'COMMA')}"></strong></li>
+                <li>Total de contenedores: <strong th:text="${totalContenedores}"></strong></li>
+                <li>Capacidad total asignada: <strong th:text="${#numbers.formatDecimal(capacidadTotalAsignada, 1, 2)} + ' kg'"></strong></li>
+                <li>Envases estimados: <strong th:text="'~' + ${#numbers.formatInteger(envasesEstimados, 3, 'COMMA')}"></strong></li>
             </ul>
         </div>
         

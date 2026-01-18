@@ -16,7 +16,6 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 import DS_06.Ecoembes.client.data.Contenedor;
 import DS_06.Ecoembes.client.data.PlantaReciclaje;
-import DS_06.Ecoembes.client.data.ResumenAsignacion;
 import DS_06.Ecoembes.client.proxies.IEcoembesServiceProxy;
 import DS_06.Ecoembes.client.service.EmailService;
 import jakarta.servlet.http.HttpSession;
@@ -420,8 +419,6 @@ public class EcoembesWebController {
             }
         }
         
-        PlantaReciclaje planta = serviceProxy.getPlantaById(token, plantaId);
-        
         // Realizar la asignación
         boolean exito = serviceProxy.asignarContenedoresAPlanta(token, contenedorIds, plantaId);
         
@@ -429,30 +426,47 @@ public class EcoembesWebController {
             // Obtener planta actualizada
             PlantaReciclaje plantaActualizada = serviceProxy.getPlantaById(token, plantaId);
             
-            // Crear resumen de asignación
-            ResumenAsignacion resumen = new ResumenAsignacion(plantaActualizada, contenedoresSeleccionados);
+            // Calcular datos del resumen
+            int totalContenedores = contenedoresSeleccionados.size();
+            float capacidadTotalAsignada = 0;
+            for (Contenedor c : contenedoresSeleccionados) {
+                capacidadTotalAsignada += c.getCapacidadOcupada();
+            }
+            int envasesEstimados = (int) (capacidadTotalAsignada * 50);
+            int capacidadRestante = plantaActualizada.getCapacidadDisponible();
+            int porcentajeOcupacion = plantaActualizada.getPorcentajeOcupacion();
+            boolean alertaSaturacion = porcentajeOcupacion >= 75;
+            String nivelAlerta = porcentajeOcupacion >= 90 ? "CRÍTICO" : (porcentajeOcupacion >= 75 ? "ADVERTENCIA" : "NORMAL");
             
-            // Guardar resumen en sesión para mostrar en página de confirmación
-            session.setAttribute("ultimaAsignacion", resumen);
+            // Guardar datos en sesión para la página de confirmación
+            session.setAttribute("confirmacion_planta", plantaActualizada);
+            session.setAttribute("confirmacion_contenedores", contenedoresSeleccionados);
+            session.setAttribute("confirmacion_totalContenedores", totalContenedores);
+            session.setAttribute("confirmacion_capacidadAsignada", capacidadTotalAsignada);
+            session.setAttribute("confirmacion_envasesEstimados", envasesEstimados);
+            session.setAttribute("confirmacion_capacidadRestante", capacidadRestante);
+            session.setAttribute("confirmacion_porcentajeOcupacion", porcentajeOcupacion);
+            session.setAttribute("confirmacion_alertaSaturacion", alertaSaturacion);
+            session.setAttribute("confirmacion_nivelAlerta", nivelAlerta);
             
             // Enviar notificación por email si se solicita
             if (enviarNotificacion && email != null) {
                 emailService.enviarNotificacionAsignacion(
                     email,
                     plantaActualizada.getNombre(),
-                    resumen.getTotalContenedores(),
-                    resumen.getCapacidadTotalAsignada(),
-                    resumen.getCapacidadRestantePlanta()
+                    totalContenedores,
+                    capacidadTotalAsignada,
+                    capacidadRestante
                 );
             }
             
             // Verificar y enviar alerta de saturación
-            if (resumen.isAlertaSaturacion()) {
+            if (alertaSaturacion) {
                 emailService.enviarAlertaSaturacion(
                     email,
                     plantaActualizada.getNombre(),
-                    resumen.getPorcentajeOcupacionPlanta(),
-                    resumen.getCapacidadRestantePlanta()
+                    porcentajeOcupacion,
+                    capacidadRestante
                 );
                 redirectAttributes.addFlashAttribute("alertaSaturacion", true);
             }
@@ -466,6 +480,7 @@ public class EcoembesWebController {
         }
     }
     
+    @SuppressWarnings("unchecked")
     @GetMapping("/asignaciones/confirmacion")
     public String confirmacionAsignacion(HttpSession session, Model model) {
         String token = (String) session.getAttribute("token");
@@ -473,17 +488,34 @@ public class EcoembesWebController {
             return "redirect:/login";
         }
         
-        ResumenAsignacion resumen = (ResumenAsignacion) session.getAttribute("ultimaAsignacion");
+        // Recuperar datos de la sesión
+        PlantaReciclaje planta = (PlantaReciclaje) session.getAttribute("confirmacion_planta");
         
-        if (resumen == null) {
+        if (planta == null) {
             return "redirect:/asignaciones";
         }
         
-        model.addAttribute("resumen", resumen);
+        model.addAttribute("planta", planta);
+        model.addAttribute("contenedoresAsignados", session.getAttribute("confirmacion_contenedores"));
+        model.addAttribute("totalContenedores", session.getAttribute("confirmacion_totalContenedores"));
+        model.addAttribute("capacidadTotalAsignada", session.getAttribute("confirmacion_capacidadAsignada"));
+        model.addAttribute("envasesEstimados", session.getAttribute("confirmacion_envasesEstimados"));
+        model.addAttribute("capacidadRestantePlanta", session.getAttribute("confirmacion_capacidadRestante"));
+        model.addAttribute("porcentajeOcupacionPlanta", session.getAttribute("confirmacion_porcentajeOcupacion"));
+        model.addAttribute("alertaSaturacion", session.getAttribute("confirmacion_alertaSaturacion"));
+        model.addAttribute("nivelAlerta", session.getAttribute("confirmacion_nivelAlerta"));
         model.addAttribute("email", session.getAttribute("email"));
         
-        // Limpiar el resumen de la sesión
-        session.removeAttribute("ultimaAsignacion");
+        // Limpiar datos de confirmación de la sesión
+        session.removeAttribute("confirmacion_planta");
+        session.removeAttribute("confirmacion_contenedores");
+        session.removeAttribute("confirmacion_totalContenedores");
+        session.removeAttribute("confirmacion_capacidadAsignada");
+        session.removeAttribute("confirmacion_envasesEstimados");
+        session.removeAttribute("confirmacion_capacidadRestante");
+        session.removeAttribute("confirmacion_porcentajeOcupacion");
+        session.removeAttribute("confirmacion_alertaSaturacion");
+        session.removeAttribute("confirmacion_nivelAlerta");
         
         return "confirmacion-asignacion";
     }

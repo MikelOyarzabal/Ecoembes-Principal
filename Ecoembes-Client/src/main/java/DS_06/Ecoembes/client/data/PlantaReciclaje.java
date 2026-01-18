@@ -3,64 +3,18 @@ package DS_06.Ecoembes.client.data;
 import java.util.ArrayList;
 import java.util.List;
 
-public class PlantaReciclaje {
-    private long id;
-    private String nombre;
-    private int capacidad;
-    private int capacidadDisponible;
-    private List<Contenedor> listaContenedor;
-    
+public record PlantaReciclaje(
+    long id,
+    String nombre,
+    int capacidad,
+    int capacidadDisponible,
+    List<Contenedor> listaContenedor) {
     public PlantaReciclaje() {
-        this.listaContenedor = new ArrayList<>();
+        this(0, null, 0, 0, new ArrayList<>());
     }
     
-    public PlantaReciclaje(long id, String nombre, int capacidad, int capacidadDisponible, List<Contenedor> listaContenedor) {
-        this.id = id;
-        this.nombre = nombre;
-        this.capacidad = capacidad;
-        this.capacidadDisponible = capacidadDisponible;
-        this.listaContenedor = listaContenedor != null ? listaContenedor : new ArrayList<>();
-    }
-    
-    // Getters y Setters
-    public long getId() {
-        return id;
-    }
-    
-    public void setId(long id) {
-        this.id = id;
-    }
-    
-    public String getNombre() {
-        return nombre;
-    }
-    
-    public void setNombre(String nombre) {
-        this.nombre = nombre;
-    }
-    
-    public int getCapacidad() {
-        return capacidad;
-    }
-    
-    public void setCapacidad(int capacidad) {
-        this.capacidad = capacidad;
-    }
-    
-    public int getCapacidadDisponible() {
-        return capacidadDisponible;
-    }
-    
-    public void setCapacidadDisponible(int capacidadDisponible) {
-        this.capacidadDisponible = capacidadDisponible;
-    }
-    
-    public List<Contenedor> getListaContenedor() {
-        return listaContenedor;
-    }
-    
-    public void setListaContenedor(List<Contenedor> listaContenedor) {
-        this.listaContenedor = listaContenedor;
+    public PlantaReciclaje(long id, String nombre, int capacidad, int capacidadDisponible) {
+        this(id, nombre, capacidad, capacidadDisponible, new ArrayList<>());
     }
     
     public int getPorcentajeOcupacion() {
@@ -75,4 +29,11 @@ public class PlantaReciclaje {
     public boolean estaSaturada(int umbral) {
         return getPorcentajeOcupacion() >= umbral;
     }
+    
+    // Métodos getter para compatibilidad con Thymeleaf
+    public long getId() { return id; }
+    public String getNombre() { return nombre; }
+    public int getCapacidad() { return capacidad; }
+    public int getCapacidadDisponible() { return capacidadDisponible; }
+    public List<Contenedor> getListaContenedor() { return listaContenedor; }
 }

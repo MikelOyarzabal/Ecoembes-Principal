@@ -50,6 +50,7 @@ public class DataInitializer {
             User reciclador5 = new User("RecicladorLuis", "luis.recicla@eco.com", "Lui5R3c1cl@!");
             User reciclador6 = new User("AmbientalistaAna", "ana.ambiente@eco.com", "4n4Amb1ent3!");
             User recicladorAdmin = new User("admin", "admin@ecoembes.com", "admin");
+            //User recicladorAdmin2 = new User("admin2", "admin@ecoembes.com", "admin");
 
             // Save users using authService
             authService.addUser(reciclador1);

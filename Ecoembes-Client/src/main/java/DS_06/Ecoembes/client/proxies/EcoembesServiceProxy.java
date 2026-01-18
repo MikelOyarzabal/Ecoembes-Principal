@@ -1,6 +1,7 @@
 package DS_06.Ecoembes.client.proxies;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -32,17 +33,60 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
         this.restTemplate = restTemplateBuilder.build();
     }
     
+    // DTO interno para deserialización JSON de Contenedor
+    private static class ContenedorDTO {
+        public long id;
+        public int codigoPostal;
+        public float capacidad;
+        public String nivelDeLlenado;
+        public Date fechaVaciado;
+        
+        public Contenedor toRecord() {
+            return new Contenedor(id, codigoPostal, capacidad, nivelDeLlenado, fechaVaciado);
+        }
+    }
+    
+    // DTO interno para deserialización JSON de PlantaReciclaje
+    private static class PlantaReciclajeDTO {
+        public long id;
+        public String nombre;
+        public int capacidad;
+        public int capacidadDisponible;
+        public List<ContenedorDTO> listaContenedor;
+        
+        public PlantaReciclaje toRecord() {
+            List<Contenedor> contenedores = new ArrayList<>();
+            if (listaContenedor != null) {
+                for (ContenedorDTO c : listaContenedor) {
+                    contenedores.add(c.toRecord());
+                }
+            }
+            return new PlantaReciclaje(id, nombre, capacidad, capacidadDisponible, contenedores);
+        }
+    }
+    
+    // DTO para enviar credenciales
+    private static class CredentialsDTO {
+        public String email;
+        public String password;
+        
+        public CredentialsDTO(String email, String password) {
+            this.email = email;
+            this.password = password;
+        }
+    }
+    
     @Override
     public String login(String email, String password) {
         try {
             String url = serverUrl + "/auth/login";
             
-            Credentials credentials = new Credentials(email, password);
+            CredentialsDTO credentials = new CredentialsDTO(email, password);
             
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_JSON);
             
-            HttpEntity<Credentials> request = new HttpEntity<>(credentials, headers);
+            HttpEntity<CredentialsDTO> request = new HttpEntity<>(credentials, headers);
             
             ResponseEntity<String> response = restTemplate.postForEntity(url, request, String.class);
             
@@ -80,10 +124,14 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
         try {
             String url = serverUrl + "/reciclaje/contenedores?token=" + token;
             
-            ResponseEntity<Contenedor[]> response = restTemplate.getForEntity(url, Contenedor[].class);
+            ResponseEntity<ContenedorDTO[]> response = restTemplate.getForEntity(url, ContenedorDTO[].class);
             
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return Arrays.asList(response.getBody());
+                List<Contenedor> result = new ArrayList<>();
+                for (ContenedorDTO dto : response.getBody()) {
+                    result.add(dto.toRecord());
+                }
+                return result;
             }
             return List.of();
         } catch (RestClientException e) {
@@ -101,13 +149,7 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
             ResponseEntity<Long> response = restTemplate.postForEntity(url, null, Long.class);
             
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                // Crear objeto contenedor con el ID devuelto
-                Contenedor nuevo = new Contenedor();
-                nuevo.setId(response.getBody());
-                nuevo.setCodigoPostal(codigoPostal);
-                nuevo.setCapacidad(capacidad);
-                nuevo.setNivelDeLlenado("VERDE");
-                return nuevo;
+                return new Contenedor(response.getBody(), codigoPostal, capacidad, "VERDE", null);
             }
             return null;
         } catch (RestClientException e) {
@@ -120,8 +162,6 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
     public Contenedor actualizarContenedor(String token, long contenedorId, int codigoPostal, 
                                            float capacidad, String nivelLlenado) {
         try {
-            // Nota: Este endpoint necesitaría existir en el servidor
-            // Por ahora, simulamos la actualización obteniendo y devolviendo el contenedor
             String url = serverUrl + "/reciclaje/contenedores/" + contenedorId + 
                         "?token=" + token + 
                         "&codigoPostal=" + codigoPostal + 
@@ -133,42 +173,30 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
             
             HttpEntity<Void> request = new HttpEntity<>(headers);
             
-            ResponseEntity<Contenedor> response = restTemplate.exchange(
-                url, HttpMethod.PUT, request, Contenedor.class);
+            ResponseEntity<ContenedorDTO> response = restTemplate.exchange(
+                url, HttpMethod.PUT, request, ContenedorDTO.class);
             
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return response.getBody();
+                return response.getBody().toRecord();
             }
             
             // Si el servidor no tiene el endpoint PUT, simular la respuesta
-            Contenedor actualizado = new Contenedor();
-            actualizado.setId(contenedorId);
-            actualizado.setCodigoPostal(codigoPostal);
-            actualizado.setCapacidad(capacidad);
-            actualizado.setNivelDeLlenado(nivelLlenado);
-            return actualizado;
+            return new Contenedor(contenedorId, codigoPostal, capacidad, nivelLlenado, null);
             
         } catch (RestClientException e) {
             System.err.println("Error actualizando contenedor: " + e.getMessage());
-            // En caso de que el endpoint no exista, devolver el contenedor con los datos nuevos
-            Contenedor actualizado = new Contenedor();
-            actualizado.setId(contenedorId);
-            actualizado.setCodigoPostal(codigoPostal);
-            actualizado.setCapacidad(capacidad);
-            actualizado.setNivelDeLlenado(nivelLlenado);
             System.out.println("Nota: Actualización simulada localmente. " +
                              "Para actualización real, usar Swagger/Postman en el servidor.");
-            return actualizado;
+            return new Contenedor(contenedorId, codigoPostal, capacidad, nivelLlenado, null);
         }
     }
     
     @Override
     public Contenedor getContenedorById(String token, long contenedorId) {
         try {
-            // Obtener todos y filtrar por ID
             List<Contenedor> todos = getAllContenedores(token);
             return todos.stream()
-                       .filter(c -> c.getId() == contenedorId)
+                       .filter(c -> c.id() == contenedorId)
                        .findFirst()
                        .orElse(null);
         } catch (Exception e) {
@@ -192,10 +220,14 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
             System.out.println("Fecha formateada: " + fechaStr);
             System.out.println("========================");
             
-            ResponseEntity<Contenedor[]> response = restTemplate.getForEntity(url, Contenedor[].class);
+            ResponseEntity<ContenedorDTO[]> response = restTemplate.getForEntity(url, ContenedorDTO[].class);
             
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return Arrays.asList(response.getBody());
+                List<Contenedor> result = new ArrayList<>();
+                for (ContenedorDTO dto : response.getBody()) {
+                    result.add(dto.toRecord());
+                }
+                return result;
             }
             return List.of();
         } catch (RestClientException e) {
@@ -210,10 +242,14 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
         try {
             String url = serverUrl + "/reciclaje/plantasreciclaje?token=" + token;
             
-            ResponseEntity<PlantaReciclaje[]> response = restTemplate.getForEntity(url, PlantaReciclaje[].class);
+            ResponseEntity<PlantaReciclajeDTO[]> response = restTemplate.getForEntity(url, PlantaReciclajeDTO[].class);
             
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return Arrays.asList(response.getBody());
+                List<PlantaReciclaje> result = new ArrayList<>();
+                for (PlantaReciclajeDTO dto : response.getBody()) {
+                    result.add(dto.toRecord());
+                }
+                return result;
             }
             return List.of();
         } catch (RestClientException e) {
@@ -227,7 +263,7 @@ public class EcoembesServiceProxy implements IEcoembesServiceProxy {
         try {
             List<PlantaReciclaje> todas = getAllPlantas(token);
             return todas.stream()
-                       .filter(p -> p.getId() == plantaId)
+                       .filter(p -> p.id() == plantaId)
                        .findFirst()
                        .orElse(null);
         } catch (Exception e) {

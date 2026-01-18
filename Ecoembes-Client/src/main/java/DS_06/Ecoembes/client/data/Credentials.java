@@ -1,30 +1,11 @@
 package DS_06.Ecoembes.client.data;
 
-public class Credentials {
-    private String email;
-    private String password;
-    
+public record Credentials(String email, String password) {
     public Credentials() {
+        this(null, null);
     }
     
-    public Credentials(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
-    
-    public String getEmail() {
-        return email;
-    }
-    
-    public void setEmail(String email) {
-        this.email = email;
-    }
-    
-    public String getPassword() {
-        return password;
-    }
-    
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    // Métodos getter para compatibilidad con serialización JSON
+    public String getEmail() { return email; }
+    public String getPassword() { return password; }
 }
